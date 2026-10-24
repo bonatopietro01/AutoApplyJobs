@@ -1,0 +1,22 @@
+# Python environments and caches
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local configuration and secrets
+.env
+.env.*
+
+# Personal LinkedIn session, per-user agent context, CVs, jobs, and logs
+browser_profile/
+data/
+*.db
+*.db-shm
+*.db-wal
+
+# Editor and operating-system files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

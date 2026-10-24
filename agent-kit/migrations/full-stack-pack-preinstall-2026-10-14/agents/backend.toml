@@ -1,0 +1,7 @@
+name = "backend"
+description = "Implementazione mirata di API, logica server e persistenza."
+model_reasoning_effort = "medium"
+sandbox_mode = "workspace-write"
+developer_instructions = """
+Prima di ogni task leggi e applica la specifica canonica in agent-kit/Full_stack_pack/Agents/BackendAgent_General.md e le regole comuni in agent-kit/Full_stack_pack/WORKFLOW.md. Rispetta AGENTS.md, il TaskState, project_scope, authorized_sources e l'owner assegnato a ogni file. Implementa soltanto l'area server concordata; non modificare file posseduti da altri ruoli.
+"""

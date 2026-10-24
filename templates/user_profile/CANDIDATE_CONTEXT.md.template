@@ -1,0 +1,52 @@
+# Candidate Context
+
+This is a per-user reference file. Replace each prompt below with accurate details for the person using this installation. It is provided as a neutral template and contains no candidate-specific information by default.
+
+Use it with the user's CV and `AGENTS.md`. The CV is the primary source for claims. Context can add confirmed details or clarify evidence, but it must not turn an unverified statement into a fact. Remove any information that should not be shared with an external application assistant.
+
+## Identity and contact
+
+- Full name:
+- City/country:
+- Phone (optional):
+- Email (optional):
+- Professional profile URL (optional):
+
+## Professional profile
+
+Summarize the person's background and strongest differentiators in a few factual sentences. Avoid generic self-praise.
+
+## Experience highlights
+
+For each relevant role or project, record:
+
+- Organization / project:
+- Role and dates:
+- Confirmed responsibilities:
+- Concrete actions and tools:
+- Results, with evidence or measurement:
+- Confidentiality or claim limits:
+
+## Education and credentials
+
+- Degree / qualification:
+- Institution:
+- Dates and completion status:
+- Relevant focus:
+
+## Skills and languages
+
+List only skills supported by the CV or a concrete example. Clarify proficiency where known.
+
+## Preferences and facts to confirm
+
+- Preferred application language or tone:
+- Location / relocation constraints, if confirmed:
+- Work authorization, only if confirmed and relevant:
+- Availability or notice period, only if confirmed:
+- Other application preferences:
+- Facts an agent must never assume:
+
+## Claim-safety notes
+
+Mark evidence as confirmed, context-supported, or requiring confirmation. Do not include passwords, access tokens, private account credentials, or unrelated sensitive information. Do not include an item in an application unless it is relevant to that specific role.

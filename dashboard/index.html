@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f4f6f2">
+    <title>Job Letter Studio</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Job Letter Studio, home">
+        <span class="brand-mark" aria-hidden="true">JL</span>
+        <span><strong>Job Letter</strong><small>STUDIO</small></span>
+      </a>
+      <div class="topbar-right">
+        <span class="local-pill"><span class="status-dot"></span> Server locale</span>
+        <button class="button button-outline" id="settings-button" type="button">
+          <span aria-hidden="true">⚙</span> Impostazioni
+        </button>
+        <button class="button button-quiet" id="sync-button" type="button">
+          <span aria-hidden="true">↻</span> Solo nuovi annunci
+        </button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="job-sidebar" aria-label="Annunci salvati">
+        <div class="sidebar-heading">
+          <div>
+            <p class="eyebrow">IL TUO SPAZIO CANDIDATURE</p>
+            <div class="sidebar-title-row">
+              <h1>Annunci salvati</h1>
+              <button class="button button-outline add-manual-job-button" id="add-manual-job" type="button">Aggiungi</button>
+            </div>
+          </div>
+          <div class="sidebar-heading-metrics">
+            <span class="count-badge" id="job-count">—</span>
+            <details class="overview-disclosure">
+              <summary>Uso AI</summary>
+              <p class="automation-overview" id="automation-overview" role="status">Controllo lo stato delle cover letter…</p>
+            </details>
+          </div>
+        </div>
+        <label class="search-field">
+          <span aria-hidden="true">⌕</span>
+          <input id="search-input" type="search" placeholder="Cerca ruolo o azienda…" autocomplete="off">
+        </label>
+        <div class="sidebar-controls">
+          <div class="sidebar-control-selects">
+            <label class="sr-only" for="status-filter">Filtra annunci per stato</label>
+            <select id="status-filter">
+              <option value="">Tutti gli stati</option>
+              <option value="NEW">Da valutare</option>
+              <option value="PROCESSED">In lavorazione</option>
+              <option value="IGNORED">Archiviati</option>
+            </select>
+            <label class="sr-only" for="job-sort">Ordina offerte per data di salvataggio</label>
+            <select id="job-sort" aria-label="Ordina offerte per data di salvataggio">
+              <option value="newest">Più recenti</option>
+              <option value="oldest">Meno recenti</option>
+            </select>
+          </div>
+          <span class="result-count" id="result-count"></span>
+        </div>
+        <div class="job-list" id="job-list" role="list" aria-label="Annunci salvati">
+          <div class="loading-state">Carico gli annunci salvati…</div>
+        </div>
+        <div class="sidebar-footer">
+          <span class="shield-icon" aria-hidden="true">◈</span>
+          <span>LinkedIn viene solo letto.<br>L’app non invia le tue lettere.</span>
+        </div>
+      </aside>
+
+      <section class="detail-area" id="detail-area" aria-live="polite">
+        <div class="empty-selection" id="empty-selection">
+          <div class="empty-symbol" aria-hidden="true">✳</div>
+          <p class="eyebrow">IL PROSSIMO PASSO, CON CALMA</p>
+          <h2>Seleziona un annuncio</h2>
+          <p>Scegli un’offerta a sinistra per consultare analisi, note degli agenti e cover letter.</p>
+        </div>
+
+        <article class="job-detail hidden" id="job-detail">
+          <div class="detail-header">
+            <div class="detail-title-block">
+              <p class="eyebrow" id="detail-company"></p>
+              <h2 id="detail-title"></h2>
+              <p class="detail-location" id="detail-location"></p>
+            </div>
+            <div class="detail-actions" id="detail-actions">
+              <span class="status-badge" id="detail-status"></span>
+              <div class="regenerate-action">
+                <button class="button button-primary" id="regenerate-job" type="button">Rigenera analisi e lettera</button>
+              </div>
+              <a class="button button-outline" id="linkedin-link" href="#" target="_blank" rel="noopener noreferrer">
+                Apri annuncio <span aria-hidden="true">↗</span>
+              </a>
+              <button class="button button-outline application-sent-button" id="mark-application-sent" type="button">Segna come inviata</button>
+            </div>
+          </div>
+          <div class="application-tracker" id="application-tracker">
+            <span id="application-status-label">Stato candidatura: non inviata</span>
+          </div>
+          <details class="content-card original-description">
+            <summary><span><span class="eyebrow">FONTE</span><strong>Descrizione completa dell’annuncio</strong></span><span class="disclosure-label">Mostra</span></summary>
+            <pre id="job-description"></pre>
+          </details>
+          <p class="generation-detail-status" id="generation-detail-status" role="status"></p>
+          <details class="content-card cover-letter-information" id="cover-letter-information">
+            <summary class="cover-letter-information-summary"><span class="card-heading"><span class="card-icon letter-icon" aria-hidden="true">✎</span><span><span class="eyebrow">SINTESI E PERSONALIZZAZIONE</span><strong id="cover-letter-information-title">Informazioni cover letter</strong></span></span><span class="disclosure-label">Mostra</span></summary>
+            <details class="content-card laya-card">
+              <summary class="section-disclosure-summary">
+                <span class="eyebrow">VALUTAZIONE LOCALE</span><strong>Decisioni Laya</strong>
+                <span class="disclosure-preview">Classificazione e prove prioritarie da verificare</span>
+              </summary>
+              <p class="settings-footnote">Classificazione, prove prioritarie e riferimenti stilistici. La verifica dei fatti resta agli agenti.</p>
+              <button class="button button-outline" id="analyze-laya" type="button">Analizza con Laya</button>
+              <div id="laya-result" aria-live="polite"></div>
+            </details>
+            <details class="content-card analysis-card research-disclosure">
+              <summary class="section-disclosure-summary">
+                <span class="eyebrow">RICERCA</span><strong>Ricerca azienda</strong>
+                <span id="research-disclosure-preview" class="disclosure-preview"></span>
+              </summary>
+              <div class="research-disclosure-content">
+                <div class="card-heading"><span class="card-icon company-icon" aria-hidden="true">01</span><div><p class="eyebrow">FONTI E RISULTATI</p><h3>Ricerca azienda</h3></div><button class="button button-quiet" id="refresh-company-research" type="button">Cerca / aggiorna fonti</button></div>
+                <label class="sr-only" for="company-analysis">Analisi dell’azienda</label>
+                <textarea class="analysis-editor" id="company-analysis" placeholder="L’analisi aziendale apparirà qui quando importerai il risultato dell’agente."></textarea>
+                <p class="inline-feedback" id="research-status" role="status"></p>
+                <p class="research-summary hidden" id="research-summary" aria-live="polite"></p>
+                <div class="research-sources" id="research-sources"></div>
+              </div>
+            </details>
+            <details class="content-card personalization-card personalization-disclosure">
+              <summary class="section-disclosure-summary">
+                <span class="eyebrow">IL RAGIONAMENTO</span><strong>Come è stata personalizzata</strong>
+                <span id="personalization-summary" class="disclosure-preview"></span>
+              </summary>
+              <div class="personalization-content">
+                <span class="agent-tag hidden" id="agent-name"></span>
+                <label class="sr-only" for="personalization-notes">Come è stata personalizzata la cover letter</label>
+                <textarea class="analysis-editor personalization-editor" id="personalization-notes" placeholder="Qui vedrai perché la lettera è stata adattata a questa azienda e a questo ruolo."></textarea>
+                <p class="generation-gaps hidden" id="generation-gaps"></p>
+              </div>
+            </details>
+          </details>
+
+          <section class="content-card letter-card">
+            <div class="letter-heading">
+              <div class="card-heading"><span class="card-icon letter-icon" aria-hidden="true">✎</span><div><p class="eyebrow">BOZZA PERSONALIZZATA</p><h3>Cover letter</h3></div></div>
+              <div class="letter-actions">
+                <button class="button button-outline" id="export-letter-text" type="button">Scarica PDF</button>
+                <button class="button button-outline" id="export-letter-word" type="button">Scarica Word</button>
+                <button class="button button-primary" id="save-materials" type="button">Salva modifiche</button>
+              </div>
+            </div>
+            <label class="sr-only" for="cover-letter-text">Testo della cover letter</label>
+            <textarea id="cover-letter-text" class="letter-editor" rows="24" placeholder="Quando avrai i risultati degli agenti, qui potrai leggere e modificare la cover letter…" spellcheck="true"></textarea>
+            <div class="letter-footer">
+              <p id="materials-feedback" class="inline-feedback" role="status">Le modifiche vengono salvate solo in locale.</p>
+              <span class="char-count" id="letter-char-count">0 caratteri</span>
+            </div>
+          </section>
+
+          <section class="content-card feedback-card" aria-labelledby="feedback-title">
+            <div class="card-heading"><span class="card-icon notes-icon" aria-hidden="true">★</span><div><p class="eyebrow">MIGLIORAMENTO</p><h3 id="feedback-title">Valuta e perfeziona</h3></div></div>
+            <p>Salva qui il voto e il commento associandoli alla versione attuale, oppure aggiungi la bozza all’archivio di esempi. Queste due azioni non chiamano l’AI; per rifare la lettera usa il tasto in alto.</p>
+            <div class="feedback-controls">
+              <label class="field-label" for="letter-rating">Voto da 1 a 10
+                <select class="text-input" id="letter-rating"><option value="10">10</option><option value="9">9</option><option value="8">8</option><option value="7">7</option><option value="6">6</option><option value="5">5</option><option value="4">4</option><option value="3">3</option><option value="2">2</option><option value="1">1</option></select>
+              </label>
+              <label class="field-label" for="letter-feedback-comment">Commento breve
+                <input class="text-input" id="letter-feedback-comment" maxlength="240" placeholder="es. generica, troppo lunga, ottima">
+              </label>
+              <div class="feedback-actions">
+                <button class="button button-outline" id="submit-letter-feedback" type="button">Salva commento</button>
+                <button class="button button-primary" id="add-letter-to-knowledge" type="button">Aggiungi a knowledge</button>
+              </div>
+            </div>
+            <p class="inline-feedback" id="feedback-result" role="status"></p>
+            <div class="letter-feedback-history" id="letter-feedback-history"></div>
+          </section>
+
+          <section class="agent-import content-card">
+            <details>
+              <summary>Inserisci o aggiorna i risultati degli agenti</summary>
+              <p>Puoi correggere o sostituire manualmente analisi e lettera, oppure caricare un documento Word/PDF.</p>
+              <label class="field-label" for="agent-source">Agente o origine</label>
+              <input class="text-input" id="agent-source" type="text" maxlength="200" placeholder="Es. Company Research Agent">
+              <div class="form-actions"><button class="button button-outline" id="save-agent-notes" type="button">Salva analisi</button></div>
+            </details>
+          </section>
+        </article>
+      </section>
+    </main>
+
+    <dialog class="manual-job-dialog" id="manual-job-dialog" aria-labelledby="manual-job-title">
+      <form id="manual-job-form">
+        <div class="manual-job-heading">
+          <div>
+            <p class="eyebrow">INSERIMENTO LOCALE</p>
+            <h2 id="manual-job-title">Aggiungi un’offerta</h2>
+          </div>
+          <button class="icon-button" id="close-manual-job" type="button" aria-label="Chiudi">×</button>
+        </div>
+        <p class="manual-job-note">L’offerta viene salvata solo in questa app. Non apre LinkedIn e non avvia ricerca online o AI.</p>
+        <label for="manual-job-description">Testo della job offer</label>
+        <textarea id="manual-job-description" name="description" rows="11" maxlength="50000" required placeholder="Incolla qui descrizione, responsabilità e requisiti dell’offerta…"></textarea>
+        <div class="manual-job-fields">
+          <label for="manual-job-title-input">Titolo <span>(facoltativo)</span>
+            <input class="text-input" id="manual-job-title-input" name="title" maxlength="160" placeholder="Se vuoto, uso la prima riga">
+          </label>
+          <label for="manual-job-company">Azienda <span>(facoltativa)</span>
+            <input class="text-input" id="manual-job-company" name="company" maxlength="160">
+          </label>
+          <label for="manual-job-location">Sede <span>(obbligatoria)</span>
+            <input class="text-input" id="manual-job-location" name="location" maxlength="160" required>
+          </label>
+        </div>
+        <p class="inline-feedback manual-job-feedback" id="manual-job-feedback" role="status"></p>
+        <div class="manual-job-actions">
+          <button class="button button-outline" id="cancel-manual-job" type="button">Annulla</button>
+          <button class="button button-primary" id="save-manual-job" type="submit">Salva offerta</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="settings-dialog" id="settings-dialog" aria-labelledby="settings-title">
+      <div class="settings-shell">
+        <header class="settings-heading">
+          <div>
+            <p class="eyebrow">CONFIGURAZIONE LOCALE</p>
+            <h2 id="settings-title">Impostazioni</h2>
+          </div>
+          <button class="icon-button" id="close-settings" type="button" aria-label="Chiudi impostazioni">×</button>
+        </header>
+
+        <section class="settings-section bulk-operations-setting" aria-label="Operazioni sulle cover letter e offerte salvate">
+          <div class="bulk-regeneration-panel">
+            <h4>Calcola e avvia le cover letter</h4>
+            <p>La stima viene calcolata sul PC usando i consumi recenti o ipotesi conservative. Non interroga l’account e non avvia chiamate AI. Dopo la conferma, le lettere vengono elaborate in coda rispettando i limiti giornalieri.</p>
+            <div class="bulk-regeneration-controls">
+              <label class="field-label" for="bulk-regeneration-mode">Cover letter da elaborare
+                <select class="text-input" id="bulk-regeneration-mode">
+                  <option value="existing">Rigenera quelle già presenti</option>
+                  <option value="only_new">Crea solo le nuove</option>
+                </select>
+              </label>
+              <label class="field-label" for="bulk-regeneration-scope">Annunci da includere
+                <select class="text-input" id="bulk-regeneration-scope">
+                  <option value="all">Tutti gli annunci nell’archivio locale</option>
+                  <option value="30">Acquisiti localmente negli ultimi 30 giorni</option>
+                  <option value="90">Acquisiti localmente negli ultimi 90 giorni</option>
+                  <option value="180">Acquisiti localmente negli ultimi 180 giorni</option>
+                  <option value="365">Acquisiti localmente nell’ultimo anno</option>
+                </select>
+              </label>
+              <button class="button button-outline" id="preview-bulk-regeneration" type="button">Calcola stima</button>
+            </div>
+            <div class="bulk-regeneration-result hidden" id="bulk-regeneration-result" aria-live="polite"></div>
+            <div class="bulk-regeneration-actions hidden" id="bulk-regeneration-actions">
+              <button class="button button-primary" id="confirm-bulk-regeneration" type="button" disabled>Conferma e metti in coda</button>
+              <button class="button button-outline hidden" id="cancel-bulk-regeneration" type="button">Annulla quelle non ancora avviate</button>
+            </div>
+            <p class="inline-feedback" id="bulk-regeneration-feedback" role="status"></p>
+          </div>
+          <div class="bulk-regeneration-panel saved-recovery-panel">
+            <h4>Ricerca e aggiornamento dei salvati</h4>
+            <p>Confronta l’intero elenco Salvati attualmente visibile su LinkedIn (massimo 100 annunci per passaggio). Importa le nuove posizioni senza avviare l’AI e nasconde quelle non più salvate. Le cover letter e le analisi già presenti restano conservate e visibili. LinkedIn non espone lo storico delle posizioni rimosse prima dell’importazione.</p>
+            <div class="bulk-regeneration-controls">
+              <button class="button button-outline" id="recover-saved-jobs" type="button">Cerca e aggiorna</button>
+            </div>
+            <section class="saved-sync-report hidden" id="saved-sync-report" aria-live="polite" aria-label="Ultimo report di aggiornamento">
+              <h5 id="saved-sync-report-title"></h5>
+              <p id="saved-sync-report-summary"></p>
+              <p id="saved-sync-report-last-success"></p>
+              <details id="saved-sync-report-details" class="hidden">
+                <summary id="saved-sync-report-details-title">Modifiche rilevate</summary>
+                <ul id="saved-sync-report-events"></ul>
+              </details>
+              <details id="saved-sync-read-details" class="hidden">
+                <summary id="saved-sync-read-details-title">Esito e tempo per annuncio</summary>
+                <ul id="saved-sync-read-events"></ul>
+              </details>
+            </section>
+            <p class="inline-feedback" id="saved-recovery-feedback" role="status"></p>
+          </div>
+        </section>
+
+        <section class="settings-section folder-setting">
+          <div class="settings-section-heading">
+            <div><p class="eyebrow">DESTINAZIONE FILE</p><h3>Cartella cover letter</h3></div>
+            <span class="settings-symbol" aria-hidden="true">↧</span>
+          </div>
+          <p>Scegli una cartella sul tuo PC. Con “Scarica” i file andranno lì, in una sottocartella per azienda e posizione. La scelta rimane salvata in questo browser.</p>
+          <div class="folder-selection-row">
+            <div class="folder-selection-status" id="destination-folder-status" role="status">Nessuna cartella selezionata · i file useranno il download standard del browser.</div>
+            <button class="button button-outline" id="choose-destination-folder" type="button">Seleziona cartella</button>
+            <button class="button button-quiet hidden" id="clear-destination-folder" type="button">Rimuovi</button>
+          </div>
+          <p class="settings-footnote">Chrome o Edge chiederanno conferma all’accesso ai file. L’app scrive solo i documenti che scegli di scaricare.</p>
+        </section>
+
+        <section class="settings-section laya-setting">
+          <div class="settings-section-heading"><div><p class="eyebrow">AUTOMATICO</p><h3>Laya locale</h3></div></div>
+          <p class="settings-footnote">L’app usa automaticamente Laya per le decisioni locali quando il modello è disponibile. Ricerca web, scrittura e revisione usano le fasi configurate; se Laya non è disponibile, la generazione prosegue.</p>
+          <p id="laya-status" class="inline-feedback" role="status"></p>
+          <details><summary>Stima dei costi e tempi locali</summary>
+            <div id="laya-cost-estimate" class="laya-cost-estimate" role="status" aria-live="polite">Calcolo della stima locale…</div>
+          </details>
+        </section>
+        <section class="settings-section ai-setting">
+          <div class="settings-section-heading">
+            <div><p class="eyebrow">GENERAZIONE AUTOMATICA</p><h3>Collegamento AI</h3></div>
+            <span class="settings-symbol" aria-hidden="true">✦</span>
+          </div>
+          <p>L’app usa l’API OpenAI con la tua chiave. L’uso può comportare costi sul tuo account API. Dopo il consenso, vengono inviati al provider il testo dell’annuncio, il testo estratto dal CV, il contesto candidato e le istruzioni degli agenti attivi. Nessuna candidatura viene inviata.</p>
+          <p>La ricerca web usa OpenAI <code>web_search</code>. Modello agenti predefinito: GPT‑5.6 Luna. Tariffe API per milione di token: Luna $0,20 input / $1,20 output; GPT‑4.1 nano $0,10 / $0,40. Cache e Laya riducono il numero di chiamate, ma Luna costa di più per token.</p>
+          <p>La dashboard conta localmente chiamate e token utilizzati. Per gli addebiti effettivi consulta la <a href="https://platform.openai.com/usage" target="_blank" rel="noopener noreferrer">pagina utilizzo OpenAI</a>.</p>
+          <p class="folder-selection-status" id="ai-connection-status" role="status">Controllo la configurazione AI…</p>
+          <div class="ai-settings-grid">
+            <label class="field-label" for="ai-model">Modello
+              <select id="ai-model" class="text-input"></select>
+            </label>
+            <label class="field-label" for="ai-max-per-cycle">Annunci per ciclo
+              <input id="ai-max-per-cycle" class="text-input" type="number" min="1" max="20" value="5">
+            </label>
+            <label class="field-label" for="ai-max-auto-job-age-days">Età massima per l’elaborazione automatica (giorni)
+              <input id="ai-max-auto-job-age-days" class="text-input" type="number" min="1" max="3650" value="90">
+            </label>
+            <label class="field-label" for="ai-max-daily-calls">Chiamate API massime al giorno
+              <input id="ai-max-daily-calls" class="text-input" type="number" min="1" max="2000" value="200">
+            </label>
+            <label class="field-label" for="ai-max-daily-agent-calls">Chiamate agenti automatici al giorno
+              <input id="ai-max-daily-agent-calls" class="text-input" type="number" min="0" max="2000" value="200">
+            </label>
+            <label class="field-label" for="ai-max-daily-research-calls">Ricerche aziendali al giorno
+              <input id="ai-max-daily-research-calls" class="text-input" type="number" min="0" max="2000" value="20">
+            </label>
+            <label class="field-label" for="ai-max-daily-revision-calls">Revisioni e bozze profilo al giorno
+              <input id="ai-max-daily-revision-calls" class="text-input" type="number" min="0" max="2000" value="20">
+            </label>
+          </div>
+          <p class="settings-footnote">La soglia d’età si applica solo all’elaborazione automatica. La rianalisi manuale qui sotto usa l’intervallo scelto.</p>
+          <label class="field-label" for="ai-api-key">La tua chiave API</label>
+          <div class="ai-key-row">
+            <input class="text-input" id="ai-api-key" type="password" maxlength="512" autocomplete="off" placeholder="Inserisci una nuova chiave API">
+            <button class="button button-outline" id="save-ai-key" type="button">Salva chiave</button>
+            <button class="button button-outline" id="verify-ai-key" type="button">Verifica</button>
+            <button class="button button-quiet" id="delete-ai-key" type="button">Rimuovi</button>
+          </div>
+          <p class="settings-footnote" id="ai-key-feedback" role="status">La chiave viene conservata nelle credenziali del sistema e non viene mostrata qui.</p>
+          <label class="ai-check"><input id="ai-consent" type="checkbox"> Autorizzo l’invio ad OpenAI del testo degli annunci, del CV estratto, del contesto e degli esempi selezionati.</label>
+          <label class="ai-check"><input id="ai-web-research" type="checkbox"> Cerca online informazioni aggiornate sull’azienda. Usa fino a tre chiamate web per ricerca, mostra le fonti e rispetta il limite giornaliero.</label>
+          <label class="ai-check"><input id="ai-enabled" type="checkbox"> Elabora automaticamente i nuovi annunci quando la configurazione è completa.</label>
+          <p class="settings-footnote" id="ai-usage-today">Consumi giornalieri caricati dal registro locale.</p>
+          <p class="settings-footnote">I limiti bloccano chiamate per categoria e totali, ma non sono un tetto monetario: il costo dipende da modello e token. Controlla gli addebiti effettivi nella pagina utilizzo OpenAI. “0” disattiva quella categoria.</p>
+          <div class="settings-actions">
+            <p class="inline-feedback" id="ai-settings-feedback" role="status">La lettura di LinkedIn rimane un’azione separata.</p>
+            <button class="button button-primary" id="save-ai-settings" type="button">Salva impostazioni e limiti</button>
+          </div>
+        </section>
+
+        <section class="settings-section agents-setting">
+          <div class="settings-section-heading">
+            <div><p class="eyebrow">FLUSSO AGENTI</p><h3>Agenti configurabili</h3></div>
+            <span class="settings-symbol" aria-hidden="true">✳</span>
+          </div>
+          <div id="agent-migration" class="migration-panel hidden">
+            <h4>Completa la migrazione degli agenti</h4>
+            <p>Il vecchio file delle impostazioni e AGENTS.md contengono istruzioni diverse. Entrambi sono conservati finché non scegli.</p>
+            <div class="agent-list-actions">
+              <button class="button button-primary" id="keep-markdown-agents" type="button">Mantieni gli agenti dettagliati di AGENTS.md</button>
+              <button class="button button-outline" id="use-saved-agents" type="button">Usa gli agenti della vecchia impostazione</button>
+            </div>
+            <div class="migration-summary" id="migration-summary"></div>
+            <p class="inline-feedback" id="migration-feedback" role="status"></p>
+          </div>
+          <p>Ordina, attiva e scegli il modello per ogni agente. Le istruzioni dettagliate restano modificabili sotto.</p>
+          <div class="agent-list-editor" id="ai-agent-list"></div>
+          <div class="agent-list-actions">
+            <button class="button button-outline" id="add-ai-agent" type="button">Aggiungi agente</button>
+            <button class="button button-primary" id="save-ai-agents" type="button">Salva agenti</button>
+          </div>
+          <details class="agent-markdown-details">
+            <summary>Regole complete del flusso (avanzate)</summary>
+            <p class="agent-connection-note">Le sezioni attive seguono l’ordine mostrato; le regole generali sono condivise.</p>
+            <label class="field-label" for="agent-instructions-markdown">File Markdown completo</label>
+            <textarea class="agent-markdown-editor" id="agent-instructions-markdown" rows="18" maxlength="100000" spellcheck="false" autocomplete="off" placeholder="Carico le istruzioni…"></textarea>
+            <div class="settings-actions">
+              <p class="inline-feedback" id="agent-markdown-feedback" role="status">Salvato nel profilo locale.</p>
+              <button class="button button-primary" id="save-agent-markdown" type="button">Salva regole complete</button>
+            </div>
+          </details>
+          <div class="agent-learning-history" id="agent-learning-history"></div>
+        </section>
+
+        <section class="settings-section candidate-context-setting">
+          <div class="settings-section-heading">
+            <div><p class="eyebrow">PROFILO PERSONALE</p><h3>Contesto del candidato</h3></div>
+            <span class="settings-symbol" aria-hidden="true">◎</span>
+          </div>
+          <p>Il file <code>data/user_profile/CANDIDATE_CONTEXT.md</code> raccoglie le tue informazioni e i limiti da rispettare. Puoi aggiornarlo qui. Se attivi l’automazione, il suo testo viene inviato al provider AI insieme al CV e all’annuncio. OneDrive o altri strumenti possono sincronizzare la cartella del progetto.</p>
+          <label class="field-label" for="candidate-context-markdown">Il tuo contesto in Markdown</label>
+          <textarea class="agent-markdown-editor" id="candidate-context-markdown" rows="18" maxlength="100000" spellcheck="false" autocomplete="off" placeholder="Carico il contesto personale…"></textarea>
+          <div class="settings-actions">
+            <p class="inline-feedback" id="candidate-context-feedback" role="status">Il contenuto è locale e non viene registrato nei log.</p>
+            <label class="file-picker button button-outline" for="context-file">Importa testo o documento</label>
+            <input class="sr-only" id="context-file" type="file" accept=".pdf,.docx,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown">
+            <button class="button button-outline" id="generate-context-draft" type="button">Crea bozza dal CV</button>
+            <button class="button button-primary" id="save-candidate-context" type="button">Salva contesto</button>
+          </div>
+          <div id="context-draft-panel" class="context-draft-panel hidden">
+            <label class="field-label" for="candidate-context-draft">Bozza da controllare — non ancora salvata</label>
+            <textarea class="agent-markdown-editor" id="candidate-context-draft" rows="10" maxlength="100000"></textarea>
+            <p id="candidate-context-questions" class="settings-footnote"></p>
+            <div class="context-evidence-grid">
+              <div><h4>Fatti rilevati nel CV</h4><ul id="candidate-context-facts"></ul></div>
+              <div><h4>Ipotesi da verificare</h4><ul id="candidate-context-inferences"></ul></div>
+            </div>
+            <div id="candidate-context-question-fields" class="context-question-fields"></div>
+            <pre id="candidate-context-diff" class="context-diff hidden"></pre>
+            <button class="button button-outline" id="use-context-draft" type="button">Copia bozza nell’editor, poi salva</button>
+          </div>
+        </section>
+
+        <section class="settings-section candidate-profile-setting">
+          <div class="settings-section-heading">
+            <div><p class="eyebrow">PROFILO CANDIDATO</p><h3>Il tuo curriculum</h3></div>
+            <span class="settings-symbol" aria-hidden="true">▤</span>
+          </div>
+          <p>Carica il CV che vuoi usare per le lettere personalizzate. Il file resta in <code>data/candidate_profile/</code>; se attivi l’automazione, l’app invia al provider solo il testo estratto.</p>
+          <p class="folder-selection-status" id="cv-status" role="status">Controllo il CV locale…</p>
+          <div class="cv-actions">
+            <label class="file-picker button button-outline" for="cv-file">Scegli CV</label>
+            <input class="sr-only" id="cv-file" name="file" type="file" accept=".pdf,.docx,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown">
+            <button class="button button-primary" id="upload-cv" type="button" disabled>Carica CV</button>
+            <button class="button button-quiet" id="delete-cv" type="button" disabled>Rimuovi CV</button>
+          </div>
+          <details class="cv-preview-details">
+            <summary>Controlla il testo estratto dal CV</summary>
+            <button class="button button-quiet" id="load-cv-preview" type="button">Mostra anteprima</button>
+            <pre class="cv-text-preview" id="cv-text-preview"></pre>
+          </details>
+          <p class="settings-footnote">Formati: PDF, Word, TXT o Markdown · massimo 10 MB e 50.000 caratteri estratti. Il PDF deve contenere testo selezionabile.</p>
+        </section>
+
+        <section class="settings-section knowledge-setting">
+          <div class="settings-section-heading">
+            <div><p class="eyebrow">RIFERIMENTI DI STILE</p><h3>Cover Letter knowledge</h3></div>
+            <span class="settings-symbol" aria-hidden="true">▤</span>
+          </div>
+          <p>Archivio locale fino a dieci lettere già create. Gli agenti ne selezionano al massimo tre pertinenti come riferimenti di stile; quando l’AI è attiva, il testo estratto può essere inviato al provider.</p>
+          <div class="knowledge-upload-row">
+            <label class="file-picker button button-outline" for="knowledge-file">Scegli cover letter</label>
+            <input class="sr-only" id="knowledge-file" type="file" accept=".pdf,.docx,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown">
+            <button class="button button-primary" id="upload-knowledge" type="button" disabled>Carica esempio</button>
+          </div>
+          <p class="file-selection-status" id="knowledge-file-name" aria-live="polite">Nessun file selezionato.</p>
+          <details class="knowledge-archive" id="knowledge-archive">
+            <summary id="knowledge-archive-summary">Esempi archiviati</summary>
+            <div class="knowledge-list" id="knowledge-list"></div>
+          </details>
+          <p class="inline-feedback" id="knowledge-feedback" role="status"></p>
+        </section>
+
+        <section class="settings-section diagnostics-setting" aria-labelledby="diagnostics-title">
+          <div class="settings-section-heading">
+            <div><p class="eyebrow">DEBUGGING LOCALE</p><h3 id="diagnostics-title">Diagnostica e log</h3></div>
+            <span class="settings-symbol diagnostics-symbol" aria-hidden="true">⌁</span>
+          </div>
+          <p>I log restano su questo PC in <code>data/logs/</code>. Qui vedi solo gli eventi generati dalla connessione corrente; i log delle sessioni precedenti restano archiviati ma non compaiono in questa vista. Nessun dato viene inviato a servizi esterni.</p>
+          <div class="diagnostics-toolbar">
+            <label><span>Livello</span>
+              <select id="log-level-filter">
+                <option value="">Tutti</option>
+                <option value="ERROR">Errori</option>
+                <option value="WARNING">Avvisi</option>
+                <option value="INFO">Informazioni</option>
+              </select>
+            </label>
+            <label><span>Componente</span>
+              <select id="log-component-filter"><option value="">Tutti</option></select>
+            </label>
+            <label class="diagnostic-search"><span>Cerca</span>
+              <input id="log-search" type="search" maxlength="120" placeholder="Evento, messaggio o ID…" autocomplete="off">
+            </label>
+            <button class="button button-outline" id="refresh-logs" type="button">Aggiorna log</button>
+            <button class="button button-outline" id="copy-filtered-logs" type="button">Copia risultati</button>
+            <button class="button button-outline" id="download-filtered-logs" type="button">Scarica JSONL</button>
+          </div>
+          <div class="diagnostic-timings">
+            <div class="settings-section-heading">
+              <div><h4>Tempi e colli di bottiglia</h4><p class="settings-footnote">Medie API degli ultimi 30 giorni e tempi locali registrati in questa connessione.</p></div>
+              <button class="button button-quiet" id="refresh-stage-timings" type="button">Aggiorna tempi</button>
+            </div>
+            <div id="diagnostic-stage-timings" class="diagnostic-stage-timings" aria-live="polite"><p class="loading-state">Carico i tempi recenti…</p></div>
+          </div>
+          <div class="diagnostics-feedback-row">
+            <p class="inline-feedback" id="diagnostics-feedback" role="status">Carico gli eventi recenti…</p>
+            <span class="diagnostics-retention">Rotazione: massimo 5 MB × 6 file</span>
+          </div>
+          <div class="diagnostic-log-list" id="diagnostic-log-list" aria-live="polite">
+            <p class="loading-state">Carico gli eventi recenti…</p>
+          </div>
+        </section>
+      </div>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>

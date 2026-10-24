@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "roles": {
+    "prompt-agent": {"file": "PromptAgent_General.md", "description": "Crea o migliora prompt su richiesta esplicita; non esegue il task descritto.", "readonly": true},
+    "app-starter": {"file": "AppStarterAgent_General.md", "description": "Prepara app nuove o organizza app esistenti preservando comportamento e struttura verificati.", "readonly": false},
+    "architect": {"file": "ArchitectAgent_General.md", "description": "Analizza in sola lettura decisioni architetturali trasversali, confini e contratti.", "readonly": true},
+    "backend": {"file": "BackendAgent_General.md", "description": "Implementa API, business logic, database e integrazioni server nelle aree assegnate.", "readonly": false},
+    "frontend": {"file": "FrontendAgent_General.md", "description": "Implementa interfacce, componenti e flussi client rispettando i contratti API.", "readonly": false},
+    "ai-engineer": {"file": "AIEngineerAgent_General.md", "description": "Implementa prompt applicativi, estrazione, retrieval e orchestrazione AI.", "readonly": false},
+    "reviewer": {"file": "ReviewerAgent_General.md", "description": "Controlla modifiche, requisiti ed evidenze in sola lettura e restituisce rilievi agli owner.", "readonly": true},
+    "evaluation": {"file": "EvaluationAgent_General.md", "description": "Valuta agenti nel progetto con benchmark autorizzati e report; distingue misure e analisi statica.", "readonly": false},
+    "agent-optimizer": {"file": "AgentOptimizerAgent_General.md", "description": "Analizza o migliora prompt canonici con evidenze dei progetti, mantenendo immutabili le varianti sotto benchmark.", "readonly": false}
+  }
+}

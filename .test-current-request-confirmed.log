@@ -1,0 +1,319 @@
+test_chat_feedback_and_history_are_isolated_by_job (tests.test_application_store.ApplicationStoreTests.test_chat_feedback_and_history_are_isolated_by_job) ... ok
+test_company_database_migrates_legacy_expired_research (tests.test_application_store.ApplicationStoreTests.test_company_database_migrates_legacy_expired_research) ... ok
+test_company_database_reuses_source_backed_facts_without_expiry (tests.test_application_store.ApplicationStoreTests.test_company_database_reuses_source_backed_facts_without_expiry) ... ok
+test_company_page_cache_is_bounded_bound_to_cited_sources_and_research_revision (tests.test_application_store.ApplicationStoreTests.test_company_page_cache_is_bounded_bound_to_cited_sources_and_research_revision) ... ok
+test_company_research_persists_consultation_date_facts_and_only_cited_urls (tests.test_application_store.ApplicationStoreTests.test_company_research_persists_consultation_date_facts_and_only_cited_urls) ... ok
+test_daily_call_reservations_enforce_total_and_category_limits (tests.test_application_store.ApplicationStoreTests.test_daily_call_reservations_enforce_total_and_category_limits) ... ok
+test_knowledge_library_caps_at_ten_and_supports_in_place_replacement (tests.test_application_store.ApplicationStoreTests.test_knowledge_library_caps_at_ten_and_supports_in_place_replacement) ... ok
+test_age_limit_change_releases_only_automatic_jobs_now_in_range (tests.test_automation.AutomationTests.test_age_limit_change_releases_only_automatic_jobs_now_in_range) ... ok
+test_age_setting_migrates_old_configuration_and_validates_bounds (tests.test_automation.AutomationTests.test_age_setting_migrates_old_configuration_and_validates_bounds) ... ok
+test_agent_markdown_is_the_only_source_and_key_is_separate_from_settings (tests.test_automation.AutomationTests.test_agent_markdown_is_the_only_source_and_key_is_separate_from_settings) ... ok
+test_auto_queue_keeps_existing_letters_until_regeneration_is_requested (tests.test_automation.AutomationTests.test_auto_queue_keeps_existing_letters_until_regeneration_is_requested) ... ok
+test_company_research_prefetch_runs_while_current_job_is_writing_and_is_reused (tests.test_automation.AutomationTests.test_company_research_prefetch_runs_while_current_job_is_writing_and_is_reused) ... ok
+test_company_research_requires_real_search_caps_tools_and_keeps_only_cited_claim_sources (tests.test_automation.AutomationTests.test_company_research_requires_real_search_caps_tools_and_keeps_only_cited_claim_sources) ... ok
+test_daily_agent_category_limit_is_detected_separately (tests.test_automation.AutomationTests.test_daily_agent_category_limit_is_detected_separately) ... ok
+test_daily_call_limit_keeps_jobs_queued_and_resumes_when_limit_changes (tests.test_automation.AutomationTests.test_daily_call_limit_keeps_jobs_queued_and_resumes_when_limit_changes) ... Queued AI jobs are waiting for the daily call limit to renew.
+ok
+test_durable_company_database_skips_web_and_only_calls_writer_and_reviewer (tests.test_automation.AutomationTests.test_durable_company_database_skips_web_and_only_calls_writer_and_reviewer) ... ok
+test_failure_preserves_previous_materials_and_retry_recovers (tests.test_automation.AutomationTests.test_failure_preserves_previous_materials_and_retry_recovers) ... AI generation failed for one job.
+ok
+test_generated_pdf_and_docx_use_the_same_source_text (tests.test_automation.AutomationTests.test_generated_pdf_and_docx_use_the_same_source_text) ... ok
+test_generation_uses_knowledge_in_order_and_archives_matching_documents (tests.test_automation.AutomationTests.test_generation_uses_knowledge_in_order_and_archives_matching_documents) ... ok
+test_internal_failure_logs_safe_stack_frames_without_exception_text (tests.test_automation.AutomationTests.test_internal_failure_logs_safe_stack_frames_without_exception_text) ... ok
+test_laya_failure_keeps_original_workflow_and_knowledge (tests.test_automation.AutomationTests.test_laya_failure_keeps_original_workflow_and_knowledge) ... Local Laya decisions unavailable; original sources retained.
+Local ranking unavailable; original generation inputs retained.
+ok
+test_laya_precedes_agents_and_intermediate_decisions_reach_reviewer (tests.test_automation.AutomationTests.test_laya_precedes_agents_and_intermediate_decisions_reach_reviewer) ... ok
+test_laya_ranks_local_knowledge_and_source_pages_and_reduces_writer_evidence_only (tests.test_automation.AutomationTests.test_laya_ranks_local_knowledge_and_source_pages_and_reduces_writer_evidence_only) ... ok
+test_manual_request_can_claim_archived_job_when_automation_is_disabled (tests.test_automation.AutomationTests.test_manual_request_can_claim_archived_job_when_automation_is_disabled) ... ok
+test_new_settings_enable_web_research_but_keep_automation_and_consent_off (tests.test_automation.AutomationTests.test_new_settings_enable_web_research_but_keep_automation_and_consent_off) ... ok
+test_no_provider_call_before_explicit_consent (tests.test_automation.AutomationTests.test_no_provider_call_before_explicit_consent) ... ok
+test_old_automatic_job_is_skipped_without_calls_but_manual_retry_is_allowed (tests.test_automation.AutomationTests.test_old_automatic_job_is_skipped_without_calls_but_manual_retry_is_allowed) ... ok
+test_old_daily_limit_error_is_skipped_before_any_provider_retry (tests.test_automation.AutomationTests.test_old_daily_limit_error_is_skipped_before_any_provider_retry) ... ok
+test_provider_uses_structured_response_and_does_not_request_storage (tests.test_automation.AutomationTests.test_provider_uses_structured_response_and_does_not_request_storage) ... ok
+test_recent_failed_company_research_is_reused_without_repeating_api_call (tests.test_automation.AutomationTests.test_recent_failed_company_research_is_reused_without_repeating_api_call) ... Company research could not be completed; generation will use verified local material.
+ok
+test_reconcile_does_not_requeue_a_job_with_an_existing_letter (tests.test_automation.AutomationTests.test_reconcile_does_not_requeue_a_job_with_an_existing_letter) ... ok
+test_research_errors_fixed_by_settings_are_not_negative_cached (tests.test_automation.AutomationTests.test_research_errors_fixed_by_settings_are_not_negative_cached) ... ok
+test_reviewer_and_coordinator_stage_results_preserve_letter_and_flag_issues (tests.test_automation.AutomationTests.test_reviewer_and_coordinator_stage_results_preserve_letter_and_flag_issues) ... ok
+test_revoking_consent_stops_following_agent_calls_and_keeps_job_pending (tests.test_automation.AutomationTests.test_revoking_consent_stops_following_agent_calls_and_keeps_job_pending) ... ok
+test_running_job_recovers_on_restart_and_duplicate_claim_is_blocked (tests.test_automation.AutomationTests.test_running_job_recovers_on_restart_and_duplicate_claim_is_blocked) ... ok
+test_startup_requeues_jobs_blocked_by_a_previous_daily_limit (tests.test_automation.AutomationTests.test_startup_requeues_jobs_blocked_by_a_previous_daily_limit) ... ok
+test_unknown_first_saved_date_is_not_assumed_fresh_or_expired (tests.test_automation.AutomationTests.test_unknown_first_saved_date_is_not_assumed_fresh_or_expired) ... ok
+test_usage_daily_filters_use_the_new_created_operation_index (tests.test_automation.AutomationTests.test_usage_daily_filters_use_the_new_created_operation_index) ... ok
+test_usage_tracks_cached_tokens_and_measured_api_duration (tests.test_automation.AutomationTests.test_usage_tracks_cached_tokens_and_measured_api_duration) ... ok
+test_complete_application_includes_research_all_agents_cache_and_projections (tests.test_cost_estimator.CostEstimatorTests.test_complete_application_includes_research_all_agents_cache_and_projections) ... ok
+test_complete_application_without_history_uses_explicit_safe_fallbacks (tests.test_cost_estimator.CostEstimatorTests.test_complete_application_without_history_uses_explicit_safe_fallbacks) ... ok
+test_gpt_56_luna_uses_the_published_cached_and_uncached_rates (tests.test_cost_estimator.CostEstimatorTests.test_gpt_56_luna_uses_the_published_cached_and_uncached_rates) ... ok
+test_stage_specific_usage_wins_over_pooled_model_average (tests.test_cost_estimator.CostEstimatorTests.test_stage_specific_usage_wins_over_pooled_model_average) ... ok
+test_uses_cached_input_rates_and_measured_api_durations (tests.test_cost_estimator.CostEstimatorTests.test_uses_cached_input_rates_and_measured_api_durations) ... ok
+test_ai_settings_key_and_single_job_regeneration_are_local_and_protected (tests.test_dashboard.DashboardHTTPTests.test_ai_settings_key_and_single_job_regeneration_are_local_and_protected) ... ok
+test_ai_usage_profile_exposes_average_stage_duration_without_prompt_data (tests.test_dashboard.DashboardHTTPTests.test_ai_usage_profile_exposes_average_stage_duration_without_prompt_data) ... ok
+test_browser_error_payload_size_is_limited (tests.test_dashboard.DashboardHTTPTests.test_browser_error_payload_size_is_limited) ... ok
+test_browser_error_rate_limit_and_host_validation (tests.test_dashboard.DashboardHTTPTests.test_browser_error_rate_limit_and_host_validation) ... ok
+test_browser_errors_are_limited_redacted_and_logged_same_origin_only (tests.test_dashboard.DashboardHTTPTests.test_browser_errors_are_limited_redacted_and_logged_same_origin_only) ... ok
+test_bulk_preview_all_includes_old_and_ignored_jobs (tests.test_dashboard.DashboardHTTPTests.test_bulk_preview_all_includes_old_and_ignored_jobs) ... ok
+test_bulk_preview_does_not_estimate_web_search_for_cached_company (tests.test_dashboard.DashboardHTTPTests.test_bulk_preview_does_not_estimate_web_search_for_cached_company) ... ok
+test_bulk_regeneration_requires_preview_confirmation_and_can_cancel_queued_work (tests.test_dashboard.DashboardHTTPTests.test_bulk_regeneration_requires_preview_confirmation_and_can_cancel_queued_work) ... ok
+test_candidate_context_is_a_separate_editable_local_markdown_file (tests.test_dashboard.DashboardHTTPTests.test_candidate_context_is_a_separate_editable_local_markdown_file) ... ok
+test_confirmed_empty_saved_list_hides_linkedin_jobs_and_keeps_cover_letters (tests.test_dashboard.DashboardHTTPTests.test_confirmed_empty_saved_list_hides_linkedin_jobs_and_keeps_cover_letters) ... ok
+test_context_import_and_cv_preview_are_local (tests.test_dashboard.DashboardHTTPTests.test_context_import_and_cv_preview_are_local) ... ok
+test_current_cover_letter_can_be_saved_to_local_knowledge_once (tests.test_dashboard.DashboardHTTPTests.test_current_cover_letter_can_be_saved_to_local_knowledge_once) ... ok
+test_cv_is_local_and_old_manual_agent_prompt_route_is_removed (tests.test_dashboard.DashboardHTTPTests.test_cv_is_local_and_old_manual_agent_prompt_route_is_removed) ... ok
+test_cv_requires_same_origin_and_upload_is_size_limited (tests.test_dashboard.DashboardHTTPTests.test_cv_requires_same_origin_and_upload_is_size_limited) ... ok
+test_dashboard_lists_jobs_and_renders_local_page (tests.test_dashboard.DashboardHTTPTests.test_dashboard_lists_jobs_and_renders_local_page) ... ok
+test_dashboard_migrates_prior_laya_opt_out_to_automatic_mode (tests.test_dashboard.DashboardHTTPTests.test_dashboard_migrates_prior_laya_opt_out_to_automatic_mode) ... ok
+test_diagnostic_view_is_bounded_and_correlates_api_requests (tests.test_dashboard.DashboardHTTPTests.test_diagnostic_view_is_bounded_and_correlates_api_requests) ... ok
+test_failed_full_recovery_keeps_the_local_snapshot_unchanged (tests.test_dashboard.DashboardHTTPTests.test_failed_full_recovery_keeps_the_local_snapshot_unchanged) ... ok
+test_feedback_is_saved_locally_without_changing_letter_or_calling_ai (tests.test_dashboard.DashboardHTTPTests.test_feedback_is_saved_locally_without_changing_letter_or_calling_ai) ... ok
+test_forget_job_endpoint_is_protected_and_keeps_cover_letter_files (tests.test_dashboard.DashboardHTTPTests.test_forget_job_endpoint_is_protected_and_keeps_cover_letter_files) ... ok
+test_forget_job_endpoint_refuses_a_running_generation (tests.test_dashboard.DashboardHTTPTests.test_forget_job_endpoint_refuses_a_running_generation) ... ok
+test_full_recovery_reconciles_current_list_and_preserves_existing_letter_data (tests.test_dashboard.DashboardHTTPTests.test_full_recovery_reconciles_current_list_and_preserves_existing_letter_data) ... ok
+test_guided_agent_edit_updates_markdown_without_erasing_shared_rules (tests.test_dashboard.DashboardHTTPTests.test_guided_agent_edit_updates_markdown_without_erasing_shared_rules) ... ok
+test_incomplete_linkedin_read_reports_partial_without_changing_database (tests.test_dashboard.DashboardHTTPTests.test_incomplete_linkedin_read_reports_partial_without_changing_database) ... ok
+test_incremental_refresh_queues_new_job_for_ai_when_enabled (tests.test_dashboard.DashboardHTTPTests.test_incremental_refresh_queues_new_job_for_ai_when_enabled) ... ok
+test_incremental_sync_passes_existing_ids_to_reader (tests.test_dashboard.DashboardHTTPTests.test_incremental_sync_passes_existing_ids_to_reader) ... ok
+test_laya_endpoint_runs_offline_with_no_openai_key (tests.test_dashboard.DashboardHTTPTests.test_laya_endpoint_runs_offline_with_no_openai_key) ... ok
+test_legacy_agent_migration_requires_choice_and_preserves_recovery_copies (tests.test_dashboard.DashboardHTTPTests.test_legacy_agent_migration_requires_choice_and_preserves_recovery_copies) ... ok
+test_local_knowledge_upload_replace_limit_preview_and_delete (tests.test_dashboard.DashboardHTTPTests.test_local_knowledge_upload_replace_limit_preview_and_delete) ... ok
+test_manual_job_endpoint_reports_invalid_text_without_saving (tests.test_dashboard.DashboardHTTPTests.test_manual_job_endpoint_reports_invalid_text_without_saving) ... ok
+test_manual_job_endpoint_saves_and_lists_offline_without_starting_services (tests.test_dashboard.DashboardHTTPTests.test_manual_job_endpoint_saves_and_lists_offline_without_starting_services) ... ok
+test_only_new_bulk_preview_and_confirmation_keep_the_same_file_aware_selection (tests.test_dashboard.DashboardHTTPTests.test_only_new_bulk_preview_and_confirmation_keep_the_same_file_aware_selection) ... ok
+test_recovery_continues_after_unreadable_details_and_persists_timed_report (tests.test_dashboard.DashboardHTTPTests.test_recovery_continues_after_unreadable_details_and_persists_timed_report) ... ok
+test_recovery_rejects_old_period_payload_and_logs_the_current_route (tests.test_dashboard.DashboardHTTPTests.test_recovery_rejects_old_period_payload_and_logs_the_current_route) ... ok
+test_rejects_host_header_rebinding (tests.test_dashboard.DashboardHTTPTests.test_rejects_host_header_rebinding) ... ok
+test_rejects_untrusted_origin_and_non_pdf_payload (tests.test_dashboard.DashboardHTTPTests.test_rejects_untrusted_origin_and_non_pdf_payload) ... ok
+test_removed_agent_prompt_route_and_cv_can_be_removed_locally (tests.test_dashboard.DashboardHTTPTests.test_removed_agent_prompt_route_and_cv_can_be_removed_locally) ... ok
+test_removed_chatbot_routes_are_unavailable_and_job_detail_is_clean (tests.test_dashboard.DashboardHTTPTests.test_removed_chatbot_routes_are_unavailable_and_job_detail_is_clean) ... ok
+test_research_endpoint_stores_real_citations_and_consults_one_job (tests.test_dashboard.DashboardHTTPTests.test_research_endpoint_stores_real_citations_and_consults_one_job) ... ok
+test_same_origin_material_save_and_pdf_archive (tests.test_dashboard.DashboardHTTPTests.test_same_origin_material_save_and_pdf_archive) ... ok
+test_single_markdown_agent_file_is_readable_and_saved_locally (tests.test_dashboard.DashboardHTTPTests.test_single_markdown_agent_file_is_readable_and_saved_locally) ... ok
+test_stable_count_mismatch_reconciles_removed_jobs_and_reports_completion (tests.test_dashboard.DashboardHTTPTests.test_stable_count_mismatch_reconciles_removed_jobs_and_reports_completion) ... ok
+test_unverified_count_mismatch_imports_visible_jobs_without_hiding_absent_local_jobs (tests.test_dashboard.DashboardHTTPTests.test_unverified_count_mismatch_imports_visible_jobs_without_hiding_absent_local_jobs) ... ok
+test_word_open_requires_a_user_action_and_opens_registered_local_file (tests.test_dashboard.DashboardHTTPTests.test_word_open_requires_a_user_action_and_opens_registered_local_file) ... ok
+test_ai_settings_and_regeneration_controls_render_in_chrome (tests.test_dashboard_ui.DashboardBrowserTests.test_ai_settings_and_regeneration_controls_render_in_chrome) ... ok
+test_complete_saved_reconciliation_hides_removed_jobs_but_retains_cover_letters (tests.test_database.JobStoreTests.test_complete_saved_reconciliation_hides_removed_jobs_but_retains_cover_letters) ... ok
+test_dashboard_materials_and_versioned_cover_letter_files (tests.test_database.JobStoreTests.test_dashboard_materials_and_versioned_cover_letter_files) ... ok
+test_dashboard_materials_reject_unknown_job_and_oversized_text (tests.test_database.JobStoreTests.test_dashboard_materials_reject_unknown_job_and_oversized_text) ... ok
+test_existing_job_database_migrates_recovery_generation_flag (tests.test_database.JobStoreTests.test_existing_job_database_migrates_recovery_generation_flag) ... ok
+test_forgetting_job_cascades_private_state_and_suppresses_future_sync (tests.test_database.JobStoreTests.test_forgetting_job_cascades_private_state_and_suppresses_future_sync) ... ok
+test_forgetting_job_is_rejected_while_generation_is_running (tests.test_database.JobStoreTests.test_forgetting_job_is_rejected_while_generation_is_running) ... ok
+test_ignored_state_is_not_overwritten_by_mark_processed (tests.test_database.JobStoreTests.test_ignored_state_is_not_overwritten_by_mark_processed) ... ok
+test_incomplete_description_rejects_the_entire_sync (tests.test_database.JobStoreTests.test_incomplete_description_rejects_the_entire_sync) ... Atomic saved-job synchronization failed.
+ok
+test_incomplete_saved_reconciliation_rolls_back_all_updates (tests.test_database.JobStoreTests.test_incomplete_saved_reconciliation_rolls_back_all_updates) ... Atomic saved-job synchronization failed.
+ok
+test_invalid_url_or_empty_search_is_rejected (tests.test_database.JobStoreTests.test_invalid_url_or_empty_search_is_rejected) ... Atomic saved-job synchronization failed.
+ok
+test_manual_job_is_local_visible_deduplicated_and_excluded_from_linkedin_scans (tests.test_database.JobStoreTests.test_manual_job_is_local_visible_deduplicated_and_excluded_from_linkedin_scans) ... ok
+test_manual_job_rejects_blank_short_or_invalid_text (tests.test_database.JobStoreTests.test_manual_job_rejects_blank_short_or_invalid_text) ... ok
+test_new_filter_search_and_job_lookup (tests.test_database.JobStoreTests.test_new_filter_search_and_job_lookup) ... ok
+test_processed_transition_requires_existing_job (tests.test_database.JobStoreTests.test_processed_transition_requires_existing_job) ... ok
+test_recovery_import_does_not_reset_existing_letter_or_job_status (tests.test_database.JobStoreTests.test_recovery_import_does_not_reset_existing_letter_or_job_status) ... ok
+test_saved_reconciliation_waits_for_an_active_generation_without_partial_updates (tests.test_database.JobStoreTests.test_saved_reconciliation_waits_for_an_active_generation_without_partial_updates) ... Atomic saved-job synchronization failed.
+ok
+test_sync_deduplicates_and_updates_without_resetting_status (tests.test_database.JobStoreTests.test_sync_deduplicates_and_updates_without_resetting_status) ... ok
+test_sync_report_persists_and_keeps_successful_timestamp_separate (tests.test_database.JobStoreTests.test_sync_report_persists_and_keeps_successful_timestamp_separate) ... ok
+test_unchanged_scan_updates_last_seen_without_changing_last_changed (tests.test_database.JobStoreTests.test_unchanged_scan_updates_last_seen_without_changing_last_changed) ... ok
+test_verified_ids_survive_unreadable_details_and_report_actual_changes (tests.test_database.JobStoreTests.test_verified_ids_survive_unreadable_details_and_report_actual_changes) ... ok
+test_external_file_reference_prevents_reset (tests.test_generated_reset.ResetTests.test_external_file_reference_prevents_reset) ... ok
+test_reset_backups_outputs_and_preserves_jobs_research_usage_and_dormancy (tests.test_generated_reset.ResetTests.test_reset_backups_outputs_and_preserves_jobs_research_usage_and_dormancy) ... ok
+test_running_generation_prevents_reset (tests.test_generated_reset.ResetTests.test_running_generation_prevents_reset) ... ok
+test_unlink_failure_rolls_back_database_and_restores_previous_files (tests.test_generated_reset.ResetTests.test_unlink_failure_rolls_back_database_and_restores_previous_files) ... ok
+test_disabled_does_not_load_model (tests.test_local_decisions.LocalDecisionTests.test_disabled_does_not_load_model) ... ok
+test_empty_sources_and_coverage_are_explicit (tests.test_local_decisions.LocalDecisionTests.test_empty_sources_and_coverage_are_explicit) ... ok
+test_generation_context_without_knowledge_or_research_is_a_successful_fallback (tests.test_local_decisions.LocalDecisionTests.test_generation_context_without_knowledge_or_research_is_a_successful_fallback) ... ok
+test_generation_preflight_runs_only_one_inference_batch (tests.test_local_decisions.LocalDecisionTests.test_generation_preflight_runs_only_one_inference_batch) ... ok
+test_intermediate_review_is_advisory (tests.test_local_decisions.LocalDecisionTests.test_intermediate_review_is_advisory) ... ok
+test_laya_is_enabled_by_default_but_missing_checkpoint_falls_back_without_download (tests.test_local_decisions.LocalDecisionTests.test_laya_is_enabled_by_default_but_missing_checkpoint_falls_back_without_download) ... ok
+test_local_agent_replacements_use_exact_source_text_and_keep_review_gate (tests.test_local_decisions.LocalDecisionTests.test_local_agent_replacements_use_exact_source_text_and_keep_review_gate) ... ok
+test_preflight_is_job_only_cached_and_strips_detailed_candidate_coverage (tests.test_local_decisions.LocalDecisionTests.test_preflight_is_job_only_cached_and_strips_detailed_candidate_coverage) ... ok
+test_sources_scores_selection_cache_and_invalidation (tests.test_local_decisions.LocalDecisionTests.test_sources_scores_selection_cache_and_invalidation) ... ok
+test_truncated_malformed_and_unavailable_do_not_invent_scores (tests.test_local_decisions.LocalDecisionTests.test_truncated_malformed_and_unavailable_do_not_invent_scores) ... Local Laya decisions unavailable; original sources retained.
+Local Laya decisions unavailable; original sources retained.
+ok
+test_uncalibrated_style_scores_do_not_override_existing_reference_selection (tests.test_local_decisions.LocalDecisionTests.test_uncalibrated_style_scores_do_not_override_existing_reference_selection) ... ok
+test_stdio_entrypoint_starts_and_serves_tools (tests.test_mcp_server.MCPServerTests.test_stdio_entrypoint_starts_and_serves_tools) ... ok
+test_tools_read_local_snapshot_and_mark_processed (tests.test_mcp_server.MCPServerTests.test_tools_read_local_snapshot_and_mark_processed) ... [10/03/26 23:33:13] INFO     A local database read         observability.py:214
+                             completed.                                        
+                    INFO     A local database read         observability.py:214
+                             completed.                                        
+                    INFO     A local database read         observability.py:214
+                             completed.                                        
+                    INFO     Saved job marked as processed observability.py:214
+                             in the local database.                            
+                    INFO     A local database read         observability.py:214
+                             completed.                                        
+                    INFO     A local database read         observability.py:214
+                             completed.                                        
+ok
+test_recent_log_filters_and_bounds_are_applied (tests.test_observability.ObservabilityTests.test_recent_log_filters_and_bounds_are_applied) ...                     INFO     Local structured logging      observability.py:214
+                             configured.                                       
+                    INFO     Loaded local snapshot.        observability.py:214
+                    ERROR    API operation failed.         observability.py:214
+ok
+test_redactor_covers_bearer_query_and_job_url_patterns (tests.test_observability.ObservabilityTests.test_redactor_covers_bearer_query_and_job_url_patterns) ...                     INFO     Local structured logging      observability.py:214
+                             configured.                                       
+ok
+test_rotation_keeps_a_bounded_number_of_valid_jsonl_files (tests.test_observability.ObservabilityTests.test_rotation_keeps_a_bounded_number_of_valid_jsonl_files) ...                     INFO     Local structured logging      observability.py:214
+                             configured.                                       
+                    INFO     Local structured logging      observability.py:214
+                             configured.                                       
+                    INFO     event-0-xxxxxxxxxxxxxxxxxxxxx observability.py:214
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxx                           
+                    INFO     event-1-xxxxxxxxxxxxxxxxxxxxx observability.py:214
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxx                           
+                    INFO     event-2-xxxxxxxxxxxxxxxxxxxxx observability.py:214
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxx                           
+                    INFO     event-3-xxxxxxxxxxxxxxxxxxxxx observability.py:214
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxx                           
+                    INFO     event-4-xxxxxxxxxxxxxxxxxxxxx observability.py:214
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxx                           
+                    INFO     event-5-xxxxxxxxxxxxxxxxxxxxx observability.py:214
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxx                           
+                    INFO     event-6-xxxxxxxxxxxxxxxxxxxxx observability.py:214
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxx                           
+                    INFO     event-7-xxxxxxxxxxxxxxxxxxxxx observability.py:214
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx                     
+                             xxxxxxxxxxxxxxxxxxxxxxx                           
+ok
+test_secrets_are_redacted_before_events_reach_other_logging_handlers (tests.test_observability.ObservabilityTests.test_secrets_are_redacted_before_events_reach_other_logging_handlers) ...                     INFO     Local structured logging      observability.py:214
+                             configured.                                       
+                    ERROR    "password":"[redacted]"       observability.py:214
+                    ERROR    Synthetic failure.            observability.py:214
+ok
+test_since_filter_limits_diagnostics_to_the_current_connection (tests.test_observability.ObservabilityTests.test_since_filter_limits_diagnostics_to_the_current_connection) ...                     INFO     Local structured logging      observability.py:214
+                             configured.                                       
+ok
+test_startup_continues_when_log_directory_cannot_be_created (tests.test_observability.ObservabilityTests.test_startup_continues_when_log_directory_cannot_be_created) ...                     INFO     Local structured logging      observability.py:214
+                             configured.                                       
+                    INFO     Logging must not stop the     observability.py:214
+                             app.                                              
+ok
+test_structured_events_include_trace_id_and_redact_credentials_and_email (tests.test_observability.ObservabilityTests.test_structured_events_include_trace_id_and_redact_credentials_and_email) ...                     INFO     Local structured logging      observability.py:214
+                             configured.                                       
+                    INFO     Checked password=[redacted]   observability.py:214
+                             api_key=[redacted] [email                         
+                             redacted]                                         
+                    WARNING  Queued AI jobs are waiting    observability.py:214
+                             for the daily call limit to                       
+                             renew.                                            
+                    ERROR    AI generation failed due to   observability.py:214
+                             an internal error.                                
+                    ERROR    Synthetic failure.            observability.py:214
+ok
+test_agent_file_rejects_empty_and_oversized_instructions (tests.test_profile.LocalProfileTests.test_agent_file_rejects_empty_and_oversized_instructions) ... ok
+test_agent_instructions_are_one_utf8_markdown_file (tests.test_profile.LocalProfileTests.test_agent_instructions_are_one_utf8_markdown_file) ... ok
+test_agent_roles_parse_from_markdown_and_guided_save_preserves_free_sections (tests.test_profile.LocalProfileTests.test_agent_roles_parse_from_markdown_and_guided_save_preserves_free_sections) ... ok
+test_candidate_profile_replaces_and_removes_only_its_cv (tests.test_profile.LocalProfileTests.test_candidate_profile_replaces_and_removes_only_its_cv) ... ok
+test_feedback_rule_is_backed_up_and_reversibly_removed (tests.test_profile.LocalProfileTests.test_feedback_rule_is_backed_up_and_reversibly_removed) ... ok
+test_fresh_install_seeds_neutral_per_user_markdown_files_once (tests.test_profile.LocalProfileTests.test_fresh_install_seeds_neutral_per_user_markdown_files_once) ... ok
+test_pdf_text_extraction_or_missing_dependency_error (tests.test_profile.LocalProfileTests.test_pdf_text_extraction_or_missing_dependency_error) ... ok
+test_text_and_word_cv_are_extracted_without_altering_the_source (tests.test_profile.LocalProfileTests.test_text_and_word_cv_are_extracted_without_altering_the_source) ... ok
+test_changing_cards_do_not_override_a_counter_mismatch (tests.test_reader.ParseJobCardTests.test_changing_cards_do_not_override_a_counter_mismatch) ... [10/03/26 23:33:14] WARNING  LinkedIn reports 36 saved jobs but   reader.py:605
+                             exposed 35 unique visible IDs;                    
+                             reading the complete list once more.              
+ok
+test_counter_mismatch_resolved_on_retry_returns_reconcilable_list (tests.test_reader.ParseJobCardTests.test_counter_mismatch_resolved_on_retry_returns_reconcilable_list) ...                     WARNING  LinkedIn reports 36 saved jobs but   reader.py:605
+                             exposed 35 unique visible IDs;                    
+                             reading the complete list once more.              
+ok
+test_description_expansion_retries_with_scoped_forced_click_after_overlay (tests.test_reader.ParseJobCardTests.test_description_expansion_retries_with_scoped_forced_click_after_overlay) ... ok
+test_description_is_incomplete_while_show_more_control_remains (tests.test_reader.ParseJobCardTests.test_description_is_incomplete_while_show_more_control_remains) ... ok
+test_description_parser_accepts_linkedin_heading_variants (tests.test_reader.ParseJobCardTests.test_description_parser_accepts_linkedin_heading_variants) ... ok
+test_description_reader_falls_back_to_linkedin_description_container (tests.test_reader.ParseJobCardTests.test_description_reader_falls_back_to_linkedin_description_container) ... ok
+test_empty_verified_envelope_survives_full_reader (tests.test_reader.ParseJobCardTests.test_empty_verified_envelope_survives_full_reader) ...                     INFO     No saved LinkedIn jobs were found.   reader.py:802
+ok
+test_expanded_description_stops_at_the_next_section (tests.test_reader.ParseJobCardTests.test_expanded_description_stops_at_the_next_section) ... ok
+test_explicit_empty_saved_list_is_confirmed_by_two_complete_scans (tests.test_reader.ParseJobCardTests.test_explicit_empty_saved_list_is_confirmed_by_two_complete_scans) ...                     INFO     LinkedIn's explicitly empty Saved    reader.py:578
+                             list was confirmed by two complete                
+                             readings.                                         
+ok
+test_explicit_empty_state_requires_empty_text_and_no_job_cards (tests.test_reader.ParseJobCardTests.test_explicit_empty_state_requires_empty_text_and_no_job_cards) ... ok
+test_full_scan_continues_past_reported_count_until_pagination_ends (tests.test_reader.ParseJobCardTests.test_full_scan_continues_past_reported_count_until_pagination_ends) ...                     INFO     Saved Jobs page 1: 1 unique visible  reader.py:525
+                             job IDs collected of 1.                           
+                    INFO     Saved Jobs page 2: 2 unique visible  reader.py:525
+                             job IDs collected of 1.                           
+ok
+test_incremental_boundary_stops_at_first_job_already_in_database (tests.test_reader.ParseJobCardTests.test_incremental_boundary_stops_at_first_job_already_in_database) ... ok
+test_incremental_scan_without_known_jobs_keeps_all_visible_ids (tests.test_reader.ParseJobCardTests.test_incremental_scan_without_known_jobs_keeps_all_visible_ids) ... ok
+test_matching_counter_requires_verified_final_page (tests.test_reader.ParseJobCardTests.test_matching_counter_requires_verified_final_page) ... ok
+test_next_timeout_after_click_accepts_stable_new_full_ids_without_reclick (tests.test_reader.ParseJobCardTests.test_next_timeout_after_click_accepts_stable_new_full_ids_without_reclick) ...                     INFO     Next click timed out; verifying      reader.py:457
+                             rendered Saved Jobs before any                    
+                             further action.                                   
+ok
+test_next_timeout_unchanged_list_is_partial_without_reclick (tests.test_reader.ParseJobCardTests.test_next_timeout_unchanged_list_is_partial_without_reclick) ...                     INFO     Next click timed out; verifying      reader.py:457
+                             rendered Saved Jobs before any                    
+                             further action.                                   
+ok
+test_next_unstable_changed_list_is_not_accepted (tests.test_reader.ParseJobCardTests.test_next_unstable_changed_list_is_not_accepted) ... ok
+test_parses_one_linkedin_job_card (tests.test_reader.ParseJobCardTests.test_parses_one_linkedin_job_card) ... ok
+test_parses_saved_counter_from_tracker_header (tests.test_reader.ParseJobCardTests.test_parses_saved_counter_from_tracker_header) ... ok
+test_rejects_job_without_a_title (tests.test_reader.ParseJobCardTests.test_rejects_job_without_a_title) ... ok
+test_rejects_link_without_a_stable_job_id (tests.test_reader.ParseJobCardTests.test_rejects_link_without_a_stable_job_id) ... ok
+test_single_job_preview_does_not_require_full_page_ids (tests.test_reader.ParseJobCardTests.test_single_job_preview_does_not_require_full_page_ids) ... ok
+test_stable_counter_mismatch_is_reconcilable_after_two_complete_scans (tests.test_reader.ParseJobCardTests.test_stable_counter_mismatch_is_reconcilable_after_two_complete_scans) ...                     WARNING  LinkedIn reports 36 saved jobs but   reader.py:605
+                             exposed 35 unique visible IDs;                    
+                             reading the complete list once more.              
+                    WARNING  LinkedIn's Saved Jobs counter        reader.py:635
+                             reports 36 then 36, but two complete              
+                             readings found the same 35 visible                
+                             job IDs. Using the repeatedly                     
+                             verified IDs for reconciliation.                  
+ok
+test_stable_larger_counter_mismatch_is_reconcilable_after_two_complete_scans (tests.test_reader.ParseJobCardTests.test_stable_larger_counter_mismatch_is_reconcilable_after_two_complete_scans) ...                     WARNING  LinkedIn reports 36 saved jobs but   reader.py:605
+                             exposed 34 unique visible IDs;                    
+                             reading the complete list once more.              
+                    WARNING  LinkedIn's Saved Jobs counter        reader.py:635
+                             reports 36 then 36, but two complete              
+                             readings found the same 34 visible                
+                             job IDs. Using the repeatedly                     
+                             verified IDs for reconciliation.                  
+ok
+test_unreadable_detail_does_not_stop_reading_later_cards (tests.test_reader.ParseJobCardTests.test_unreadable_detail_does_not_stop_reading_later_cards) ...                     WARNING  Could not read saved-job detail 1/2  reader.py:848
+                             (ID 111) after two attempts;                      
+                             continuing.                                       
+                    INFO     Read saved job 2/2 (ID 222;          reader.py:854
+                             description complete: True).                      
+ok
+test_visible_ids_safety_limit_includes_unreadable_cards (tests.test_reader.ParseJobCardTests.test_visible_ids_safety_limit_includes_unreadable_cards) ... ok
+test_zero_counter_with_unreadable_visible_card_is_not_empty (tests.test_reader.ParseJobCardTests.test_zero_counter_with_unreadable_visible_card_is_not_empty) ... ok
+test_zero_counter_without_verified_empty_page_does_not_reconcile (tests.test_reader.ParseJobCardTests.test_zero_counter_without_verified_empty_page_does_not_reconcile) ... ok
+test_only_public_https_sources_are_considered_and_page_failures_are_nonfatal (tests.test_research_pages.ResearchPageTests.test_only_public_https_sources_are_considered_and_page_failures_are_nonfatal) ... ok
+test_visible_text_strips_scripts_navigation_and_caps_page_text (tests.test_research_pages.ResearchPageTests.test_visible_text_strips_scripts_navigation_and_caps_page_text) ... ok
+
+----------------------------------------------------------------------
+Ran 171 tests in 150.366s
+
+OK

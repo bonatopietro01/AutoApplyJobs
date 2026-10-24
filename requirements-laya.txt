@@ -1,0 +1,2 @@
+# Optional local CPU decision engine. Install only when using Laya.
+laya==0.3.21

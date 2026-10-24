@@ -1,0 +1,30 @@
+# Agenti di sviluppo
+
+Per richieste di implementazione delega ai sottoagenti in `.codex/agents/`:
+1. `analyzer`: analisi in sola lettura, piano e TaskState compatto.
+2. `writer`: implementazione del piano e verifiche autorizzate.
+3. `reviewer`: sola lettura; obbligatorio per gate REQUIRED, per OPTIONAL quando il rischio lo giustifica, omesso per NONE.
+
+Per richieste esplicite di preparazione di un prompt usa `prompt`, senza implementare.
+
+L agente principale coordina le fasi in successione, passa i checkpoint, verifica le evidenze e consegna il risultato. Mantieni un solo Writer sugli stessi file e rispetta la concorrenza disponibile.
+
+TaskState: obiettivo, scope, fonti autorizzate, criteri, vincoli, file pertinenti, fatti, assunzioni, piano, verifiche e review gate. Evita transcript completi e segreti.
+
+Istruzioni superiori e richieste dell utente prevalgono sui ruoli. Il coordinatore prosegue il lavoro risolvibile anche quando un ruolo esaurisce i tentativi. Distingui verifiche locali e servizi reali.
+
+Gli agenti ereditano il modello della sessione. Analyzer e Reviewer: ragionamento high; Writer e Prompt: medium. Definizioni generali riutilizzabili copiando `.codex/agents/` e queste istruzioni in altri progetti.
+
+## Integrazione di Full_stack_pack
+
+Il pacchetto portabile è conservato in agent-kit/Full_stack_pack. Per i task pertinenti consulta WORKFLOW.md, la specifica del ruolo in Agents/ e soltanto le skills necessarie in Skills/. PROMPTME.md è il prompt di onboarding del pacchetto, non un comando da eseguire a ogni task.
+
+La pipeline locale resta coordinata così:
+1. analyzer ricostruisce il flusso, i requisiti e il TaskState in sola lettura.
+2. architect è facoltativo e in sola lettura per decisioni che attraversano componenti, dati o contratti.
+3. writer coordina l'implementazione. Per un'area chiara può assegnare file distinti a backend, frontend o ai_engineer, secondo la richiesta e le specifiche del pack; assegna un solo owner per file e passa loro il TaskState e i contratti necessari. Per modifiche generali o non coperte resta owner il Writer.
+4. reviewer resta in sola lettura ed è chiamato secondo il review gate stabilito dall'Analyzer.
+
+Per richieste esplicite di prompt usa prompt e consulta Agents/PromptAgent_General.md. Le specifiche del pack integrano i ruoli esistenti senza sostituire le personalizzazioni in .codex/agents/analyzer.toml, writer.toml, reviewer.toml e prompt.toml. I nuovi file TOML specialistici sono gli entry point locali e rimandano alle specifiche Markdown del pack, mantenute come fonte canonica di ruolo in questa copia.
+
+Il pack è una copia esportata delle fonti canoniche in PROMPT_AGENTI: gli aggiornamenti non si propagano automaticamente. La presenza dei file non attiva da sola il runtime delle skills; seleziona e leggi i relativi SKILL.md quando pertinenti. Mantieni sempre scope, permessi e regole di verifica del progetto.
