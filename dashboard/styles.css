@@ -16,6 +16,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 
 body {
   margin: 0;
@@ -60,10 +61,17 @@ a { color: inherit; }
   min-height: 0; display: flex; flex-direction: column; padding: 27px 17px 15px 22px;
   background: #fbfcfa; border-right: 1px solid var(--line);
 }
-.sidebar-heading { display: flex; justify-content: space-between; align-items: center; padding: 0 7px 21px; }
-.sidebar-title-row { display: flex; align-items: center; flex-wrap: nowrap; gap: 6px; }
+.sidebar-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; padding: 0 7px 21px; }
+.sidebar-heading > div:first-child { min-width: 0; }
+.sidebar-title-row { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .eyebrow { margin: 0; color: #829087; font-size: 9px; line-height: 1.4; font-weight: 800; letter-spacing: .14em; }
-.sidebar-heading h1 { margin: 6px 0 0; font-size: 16px; letter-spacing: -.04em; white-space: nowrap; }
+.sidebar-heading h1 { max-width: 230px; margin: 6px 0 0; font-size: 14px; line-height: 1.3; letter-spacing: -.03em; overflow-wrap: anywhere; }
+.sidebar-title-row h2 { min-width: 0; margin: 0; font-size: 16px; letter-spacing: -.04em; white-space: nowrap; }
+.workspace-switch { display: flex; width: fit-content; gap: 3px; margin-top: 8px; padding: 3px; border: 1px solid var(--line); border-radius: 9px; background: #f2f5f1; }
+.workspace-choice { min-height: 27px; padding: 0 10px; border: 0; border-radius: 7px; color: var(--soft-ink); background: transparent; font-size: 10px; font-weight: 700; cursor: pointer; }
+.workspace-choice:hover { background: #e8eee8; }
+.workspace-choice:focus-visible { outline: 2px solid #72a78b; outline-offset: 1px; }
+.workspace-choice.selected { color: var(--green-dark); background: #fff; box-shadow: 0 1px 3px rgba(24,52,37,.12); }
 .add-manual-job-button { min-height: 27px; flex: 0 0 auto; padding: 0 6px; font-size: 9px; white-space: nowrap; }
 .count-badge, .file-count { display: inline-grid; min-width: 26px; height: 26px; padding: 0 7px; place-items: center; border-radius: 999px; color: var(--green-dark); background: var(--green-soft); font-size: 11px; font-weight: 800; }
 .search-field { height: 41px; display: flex; align-items: center; gap: 8px; padding: 0 12px; border: 1px solid var(--line); border-radius: 11px; background: white; color: #819087; }

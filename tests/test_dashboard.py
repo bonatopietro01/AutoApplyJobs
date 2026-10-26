@@ -103,9 +103,26 @@ class DashboardHTTPTests(unittest.TestCase):
         self.assertNotIn(b'id="mark-application-sent"', page.split(b'id="application-tracker"', 1)[1].split(b"</div>", 1)[0])
         app_status, _, app_script = self.request("/app.js")
         self.assertEqual(app_status, 200)
+
         self.assertIn(b"bulkOperations.after(aiSettings)", app_script)
         self.assertIn(b"accordion.open = false", app_script)
         self.assertIn(b"function jobDocumentBaseName(job)", app_script)
+
+    def test_job_spaces_filter_prepared_origin_without_hiding_existing_linkedin_jobs(self) -> None:
+        self.store.create_chatgpt_job(
+            title="Data Analyst", company="Example Corp", location="Milan, Italy",
+            description="Build useful reports for the analytics team.",
+            application_url="https://www.linkedin.com/jobs/view/123456789/?utm_source=chatgpt",
+            cover_letter_text="Dear hiring team, I am applying with relevant experience.",
+        )
+
+        _, _, openai_body = self.request("/api/jobs?workspace=openai")
+        _, _, linkedin_body = self.request("/api/jobs?workspace=linkedin")
+        openai_jobs = json.loads(openai_body)["jobs"]
+        linkedin_jobs = json.loads(linkedin_body)["jobs"]
+
+        self.assertEqual([job["origin"] for job in openai_jobs], ["chatgpt"])
+        self.assertEqual([job["origin"] for job in linkedin_jobs], ["linkedin"])
 
     def test_manual_application_status_route_marks_only_application_state(self) -> None:
         job, _ = self.store.create_chatgpt_job(
@@ -157,7 +174,7 @@ class DashboardHTTPTests(unittest.TestCase):
         )
         self.assertIn(b'request("/api/jobs/manual"', script)
         self.assertIn(b'job.source === "manual"', script)
-        self.assertIn(b'job.application_url || job.linkedin_url', script)
+        self.assertIn(b'const announcementUrl = [job.linkedin_url, job.normalized_url, job.application_url].find(isWebUrl)', script)
         self.assertIn(b'/application-status', script)
 
     def test_manual_job_endpoint_saves_and_lists_offline_without_starting_services(self) -> None:
@@ -338,7 +355,7 @@ class DashboardHTTPTests(unittest.TestCase):
         self.request("/api/jobs/123456789/documents", method="POST", body=json.dumps({"format":"pdf"}).encode(), headers=origin)
         _, _, edited_detail = self.request("/api/jobs/123456789")
         self.assertEqual(json.loads(edited_detail)["generation"]["state"], "MANUAL")
-        self.assertEqual(len(json.loads(edited_detail)["cover_letters"]), 0)
+        self.assertEqual([letter["file_format"] for letter in json.loads(edited_detail)["cover_letters"]], ["pdf"])
 
         _, _, logs_body = self.request("/api/diagnostics/logs?limit=100")
         self.assertNotIn(secret, logs_body.decode())

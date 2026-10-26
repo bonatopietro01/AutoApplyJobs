@@ -13,6 +13,94 @@ from tests.test_database import make_job
 
 
 class DashboardBrowserTests(unittest.TestCase):
+    def test_openai_workspace_hides_linkedin_actions_on_mobile(self) -> None:
+        try:
+            from playwright.sync_api import sync_playwright
+        except ImportError:
+            self.skipTest("Playwright is not installed")
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            store = JobStore(Path(temp_dir) / "data" / "jobs.sqlite3")
+            store.sync_jobs([make_job()])
+            store.create_manual_job(
+                "Prepare weekly reports and analyze sales data for the operations team.",
+                title="Manual saved role", company="Manual Example", location="Milan, Italy",
+            )
+            store.create_chatgpt_job(
+                title="Data Analyst",
+                company="Example Corp",
+                location="Milan, Italy",
+                description=("Build useful reports for business teams, analyze data, "
+                            "and communicate findings to stakeholders."),
+                job_url="https://www.linkedin.com/jobs/view/123456789/",
+                application_url="https://apply.example.org/start/123456789",
+                cover_letter_text="Dear hiring team, I am applying for this role.",
+            )
+            server = DashboardHTTPServer(
+                ("127.0.0.1", 0), store,
+                profile_directory=Path(temp_dir) / "data" / "user_profile",
+            )
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            try:
+                with sync_playwright() as playwright:
+                    try:
+                        browser = playwright.chromium.launch(channel="chrome", headless=True)
+                    except Exception as error:
+                        self.skipTest(f"Chrome is not available for the smoke test: {type(error).__name__}")
+                    try:
+                        page = browser.new_page(viewport={"width": 390, "height": 844})
+                        job_requests: list[str] = []
+                        page.on("request", lambda request: job_requests.append(request.url)
+                                if "/api/jobs?" in request.url else None)
+                        page.goto(f"http://127.0.0.1:{server.server_port}/")
+                        page.locator("#workspace-title").filter(has_text="LinkedIn").wait_for()
+                        page.locator('[data-workspace="openai"]').click()
+                        page.locator("#workspace-title").filter(has_text="Open AI").wait_for()
+                        self.assertFalse(page.locator("#add-manual-job").is_visible())
+                        self.assertFalse(page.locator("#sync-button").is_visible())
+                        page.locator(".job-row-item").first.wait_for()
+                        row_origins = page.locator(".job-row-item").evaluate_all(
+                            "rows => rows.map(row => row.innerText)"
+                        )
+                        self.assertEqual(
+                            len(row_origins), 1,
+                            f"workspace={page.evaluate('state.workspace')}, requests={job_requests}, rows={row_origins}",
+                        )
+                        self.assertTrue(page.locator(".job-source-badge").is_visible())
+                        page.locator("#application-link").wait_for(state="visible")
+                        self.assertEqual(
+                            page.locator("#linkedin-link").get_attribute("href"),
+                            "https://www.linkedin.com/jobs/view/123456789/",
+                        )
+                        self.assertEqual(
+                            page.locator("#application-link").get_attribute("href"),
+                            "https://apply.example.org/start/123456789",
+                        )
+                        self.assertLessEqual(
+                            page.evaluate("document.documentElement.scrollWidth"), 390,
+                        )
+                        page.screenshot(
+                            path=str(Path(tempfile.gettempdir()) / "job-letter-studio-openai-mobile.png"),
+                            full_page=False,
+                        )
+                        page.locator('[data-workspace="linkedin"]').click()
+                        page.locator("#workspace-title").filter(has_text="LinkedIn").wait_for()
+                        self.assertTrue(page.locator("#add-manual-job").is_visible())
+                        self.assertTrue(page.locator("#sync-button").is_visible())
+                        manual_row = page.locator(".job-row").filter(has_text="Manual saved role")
+                        manual_row.wait_for()
+                        manual_row.click()
+                        page.locator("#detail-title").filter(has_text="Manual saved role").wait_for()
+                        self.assertFalse(page.locator("#linkedin-link").is_visible())
+                        self.assertFalse(page.locator("#application-link").is_visible())
+                    finally:
+                        browser.close()
+            finally:
+                server.shutdown()
+                server.server_close()
+                thread.join(timeout=3)
+
     def test_ai_settings_and_regeneration_controls_render_in_chrome(self) -> None:
         try:
             from playwright.sync_api import sync_playwright
@@ -231,9 +319,10 @@ class DashboardBrowserTests(unittest.TestCase):
                         self.assertLessEqual(page.evaluate("document.documentElement.scrollWidth"), 390)
                         page.set_viewport_size({"width": 1280, "height": 900})
                         page.locator("#settings-button").click()
-                        page.locator("#ai-max-auto-job-age-days").wait_for()
-                        self.assertLess(page.locator(".bulk-operations-setting").evaluate("el => el.getBoundingClientRect().top"), page.locator(".ai-setting").evaluate("el => el.getBoundingClientRect().top"))
                         self.assertFalse(page.locator(".ai-setting").get_attribute("open"))
+                        page.locator(".ai-setting > summary").click()
+                        page.locator("#ai-max-auto-job-age-days").wait_for(state="visible")
+                        self.assertLess(page.locator(".bulk-operations-setting").evaluate("el => el.getBoundingClientRect().top"), page.locator(".ai-setting").evaluate("el => el.getBoundingClientRect().top"))
                         self.assertLess(page.locator("#bulk-regeneration-mode").evaluate("el => el.getBoundingClientRect().top"), page.locator("#recover-saved-jobs").evaluate("el => el.getBoundingClientRect().top"))
                         page.locator(".laya-setting > summary").click()
                         page.locator(".laya-setting details > summary").click()

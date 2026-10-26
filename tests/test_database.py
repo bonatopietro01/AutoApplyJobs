@@ -65,6 +65,191 @@ class JobStoreTests(unittest.TestCase):
         self.assertEqual(refreshed["status"], "PROCESSED")
         self.assertEqual(refreshed["first_saved_at"], initial["first_saved_at"])
 
+    def test_same_canonical_url_can_have_linkedin_and_chatgpt_records(self) -> None:
+        self.store.sync_jobs([make_job()])
+        self.store.save_job_materials("123456789", cover_letter_text="LinkedIn letter stays unchanged.")
+        chatgpt_job, created = self.store.create_chatgpt_job(
+            title="Data Analyst", company="Example Corp", location="Milan, Italy",
+            description="Build useful reports for the analytics team.",
+            application_url="https://www.linkedin.com/jobs/view/123456789/?utm_source=chatgpt",
+            cover_letter_text="Dear hiring team, I am applying with relevant experience.",
+        )
+
+        self.assertTrue(created)
+        self.assertEqual(chatgpt_job["origin"], "chatgpt")
+        self.assertNotEqual(chatgpt_job["linkedin_job_id"], "123456789")
+        self.assertEqual(chatgpt_job["normalized_url"], self.store.get_job("123456789")["normalized_url"])
+        self.assertEqual(self.store.get_job("123456789")["origin"], "linkedin")
+        self.assertEqual(self.store.get_job_bundle("123456789")["materials"]["cover_letter_text"],
+                         "LinkedIn letter stays unchanged.")
+        self.assertFalse(self.store._fetch_all(
+            "PRAGMA foreign_key_check"))
+        duplicate, created_again = self.store.create_chatgpt_job(
+            title="Updated title", company="Example Corp", location="Milan, Italy",
+            description="Build useful reports for the analytics team.",
+            application_url="https://www.linkedin.com/jobs/view/123456789/?utm_medium=duplicate",
+            cover_letter_text="This must not replace the first ChatGPT letter.",
+        )
+        self.assertFalse(created_again)
+        self.assertEqual(duplicate["linkedin_job_id"], chatgpt_job["linkedin_job_id"])
+
+    def test_linkedin_sync_keeps_same_url_chatgpt_record_and_materials_separate(self) -> None:
+        chatgpt_job, created = self.store.create_chatgpt_job(
+            title="Data Analyst", company="Example Corp", location="Milan, Italy",
+            description="Build useful reports for the analytics team.",
+            application_url="https://www.linkedin.com/jobs/view/123456789/",
+            cover_letter_text="ChatGPT letter stays unchanged.",
+            document_contents={"pdf": b"pdf contents", "docx": b"docx contents"},
+        )
+        self.assertTrue(created)
+
+        counts = self.store.sync_jobs([make_job()])
+
+        self.assertEqual(counts["inserted"], 1)
+        self.assertEqual(self.store.get_job("123456789")["origin"], "linkedin")
+        saved_chatgpt = self.store.get_job(str(chatgpt_job["linkedin_job_id"]))
+        self.assertEqual(saved_chatgpt["origin"], "chatgpt")
+        bundle = self.store.get_job_bundle(str(chatgpt_job["linkedin_job_id"]))
+        self.assertEqual(bundle["materials"]["cover_letter_text"], "ChatGPT letter stays unchanged.")
+        self.assertEqual({item["file_format"] for item in bundle["cover_letters"]}, {"pdf", "docx"})
+        self.assertEqual(len(self.store.get_dashboard_jobs(workspace="linkedin")), 1)
+        self.assertEqual(len(self.store.get_dashboard_jobs(workspace="openai")), 1)
+
+    def test_chatgpt_job_keeps_announcement_and_application_urls_separate(self) -> None:
+        job, created = self.store.create_chatgpt_job(
+            title="Data Analyst", company="Example Corp", location="Milan, Italy",
+            description="Build useful reports for the analytics team.",
+            job_url="https://jobs.example.org/roles/analyst?utm_source=search",
+            application_url="https://apply.example.org/start/analyst",
+            cover_letter_text="Dear hiring team, I am applying with relevant experience.",
+        )
+
+        self.assertTrue(created)
+        self.assertEqual(job["normalized_url"], "https://jobs.example.org/roles/analyst")
+        self.assertEqual(job["linkedin_url"], "https://jobs.example.org/roles/analyst")
+        self.assertEqual(job["application_url"], "https://apply.example.org/start/analyst")
+
+    def test_chatgpt_url_lookup_ignores_linkedin_copy_of_same_announcement(self) -> None:
+        self.store.sync_jobs([make_job()])
+        announcement_url = "https://www.linkedin.com/jobs/view/123456789/"
+        self.assertIsNone(self.store.get_chatgpt_job_by_url(announcement_url))
+        chatgpt_job, _ = self.store.create_chatgpt_job(
+            title="Data Analyst", company="Example Corp", location="Milan, Italy",
+            description="Build useful reports for the analytics team.",
+            job_url=announcement_url, application_url=announcement_url,
+            cover_letter_text="Dear hiring team, I am applying with relevant experience.",
+        )
+
+        match = self.store.get_chatgpt_job_by_url(announcement_url + "?utm_source=daily")
+
+        self.assertEqual(match["linkedin_job_id"], chatgpt_job["linkedin_job_id"])
+        self.assertEqual(match["origin"], "chatgpt")
+
+    def test_chatgpt_source_references_have_count_and_total_size_limits(self) -> None:
+        common = {
+            "title": "Data Analyst", "company": "Example Corp", "location": "Milan, Italy",
+            "description": "Build useful reports for the analytics team.",
+            "application_url": "https://apply.example.org/start/analyst",
+            "cover_letter_text": "Dear hiring team, I am applying with relevant experience.",
+        }
+        with self.assertRaises(JobStoreError):
+            self.store.create_chatgpt_job(**common, source_references=["https://example.org"] * 51)
+        with self.assertRaises(JobStoreError):
+            self.store.create_chatgpt_job(**common, source_references=["x" * 2_000] * 16)
+
+    def test_dashboard_job_workspace_filter_keeps_manual_rows_with_linkedin(self) -> None:
+        self.store.sync_jobs([make_job()])
+        chatgpt_job, _ = self.store.create_chatgpt_job(
+            title="Data Analyst", company="Example Corp", location="Milan, Italy",
+            description="Build useful reports for the analytics team.",
+            application_url="https://jobs.example.org/roles/analyst",
+            cover_letter_text="Dear hiring team, I am applying with relevant experience.",
+        )
+
+        openai_jobs = self.store.get_dashboard_jobs(workspace="openai")
+        linkedin_jobs = self.store.get_dashboard_jobs(workspace="linkedin")
+
+        self.assertEqual([job["origin"] for job in openai_jobs], ["chatgpt"])
+        self.assertEqual({job["origin"] for job in linkedin_jobs}, {"linkedin"})
+        self.assertEqual(chatgpt_job["origin"], "chatgpt")
+
+    def test_old_global_url_uniqueness_migrates_without_losing_materials_or_files(self) -> None:
+        legacy_path = Path(self.temp_dir.name) / "legacy.sqlite3"
+        old_url = "https://www.linkedin.com/jobs/view/123456789/"
+        connection = sqlite3.connect(legacy_path)
+        try:
+            connection.executescript("""
+                PRAGMA foreign_keys=ON;
+                CREATE TABLE jobs (
+                    job_key TEXT PRIMARY KEY, linkedin_job_id TEXT UNIQUE,
+                    normalized_url TEXT NOT NULL UNIQUE, title TEXT NOT NULL,
+                    company TEXT, location TEXT, linkedin_url TEXT NOT NULL,
+                    description TEXT NOT NULL,
+                    description_complete INTEGER NOT NULL CHECK(description_complete IN (0,1)),
+                    status TEXT NOT NULL DEFAULT 'NEW' CHECK(status IN ('NEW','PROCESSED','IGNORED')),
+                    first_saved_at TEXT NOT NULL, last_seen_at TEXT NOT NULL,
+                    last_changed_at TEXT NOT NULL DEFAULT '',
+                    suppress_auto_generation INTEGER NOT NULL DEFAULT 0 CHECK(suppress_auto_generation IN (0,1)),
+                    linkedin_saved INTEGER NOT NULL DEFAULT 1 CHECK(linkedin_saved IN (0,1)),
+                    source TEXT NOT NULL DEFAULT 'linkedin' CHECK(source IN ('linkedin','manual')),
+                    source_fingerprint TEXT, origin TEXT NOT NULL DEFAULT 'linkedin'
+                        CHECK(origin IN ('linkedin','manual','chatgpt')),
+                    application_url TEXT NOT NULL DEFAULT '', application_status TEXT NOT NULL DEFAULT 'NOT_APPLIED'
+                        CHECK(application_status IN ('NOT_APPLIED','APPLIED','REJECTED')),
+                    application_status_updated_at TEXT NOT NULL DEFAULT '',
+                    source_references TEXT NOT NULL DEFAULT '[]'
+                );
+                CREATE TABLE job_materials (
+                    linkedin_job_id TEXT PRIMARY KEY REFERENCES jobs(linkedin_job_id) ON DELETE CASCADE,
+                    company_analysis TEXT NOT NULL DEFAULT '', role_analysis TEXT NOT NULL DEFAULT '',
+                    personalization_notes TEXT NOT NULL DEFAULT '', cover_letter_text TEXT NOT NULL DEFAULT '',
+                    agent_name TEXT NOT NULL DEFAULT '', updated_at TEXT NOT NULL
+                );
+                CREATE TABLE cover_letters (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    linkedin_job_id TEXT NOT NULL REFERENCES jobs(linkedin_job_id) ON DELETE CASCADE,
+                    version INTEGER NOT NULL, file_format TEXT NOT NULL CHECK(file_format IN ('pdf','docx')),
+                    relative_path TEXT NOT NULL UNIQUE, original_filename TEXT NOT NULL,
+                    created_at TEXT NOT NULL, UNIQUE(linkedin_job_id,file_format,version)
+                );
+            """)
+            connection.execute("""INSERT INTO jobs
+                (job_key,linkedin_job_id,normalized_url,title,company,location,linkedin_url,description,
+                 description_complete,first_saved_at,last_seen_at,last_changed_at,application_url)
+                VALUES ('123456789','123456789',?,?,?,'Milan','https://www.linkedin.com/jobs/view/123456789/',
+                        'Build useful reports for the analytics team.',1,'now','now','now',?)""",
+                (old_url, "Data Analyst", "Example Corp", old_url))
+            connection.execute("""INSERT INTO job_materials
+                (linkedin_job_id,cover_letter_text,updated_at) VALUES (?,?,?)""",
+                ("123456789", "Old saved letter stays.", "now"))
+            connection.execute("""INSERT INTO cover_letters
+                (linkedin_job_id,version,file_format,relative_path,original_filename,created_at)
+                VALUES ('123456789',1,'pdf','cover_letters/123456789/old.pdf','old.pdf','now')""")
+            connection.commit()
+        finally:
+            connection.close()
+        legacy_file = legacy_path.parent / "cover_letters" / "123456789" / "old.pdf"
+        legacy_file.parent.mkdir(parents=True)
+        legacy_file.write_bytes(b"old-pdf")
+
+        migrated = JobStore(legacy_path)
+        chatgpt_job, created = migrated.create_chatgpt_job(
+            title="Data Analyst", company="Example Corp", location="Milan",
+            description="Build useful reports for the analytics team.", application_url=old_url,
+            cover_letter_text="ChatGPT letter stays separate.",
+        )
+
+        self.assertTrue(created)
+        self.assertEqual(chatgpt_job["origin"], "chatgpt")
+        self.assertEqual(migrated.get_job_bundle("123456789")["materials"]["cover_letter_text"],
+                         "Old saved letter stays.")
+        self.assertEqual(legacy_file.read_bytes(), b"old-pdf")
+        connection = migrated._connection()
+        try:
+            self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
+        finally:
+            connection.close()
+
     def test_new_filter_search_and_job_lookup(self) -> None:
         self.store.sync_jobs([make_job(), make_job("987654321", title="UX Researcher")])
 

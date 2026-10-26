@@ -811,8 +811,11 @@ class DashboardRequestHandler(BaseHTTPRequestHandler):
             params = parse_qs(request.query)
             query = params.get("q", [""])[0]
             status = params.get("status", [""])[0] or None
+            workspace = params.get("workspace", [""])[0] or None
             try:
-                jobs = self.server.store.get_dashboard_jobs(query=query, status=status)
+                jobs = self.server.store.get_dashboard_jobs(
+                    query=query, status=status, workspace=workspace
+                )
             except JobStoreError as error:
                 self._error(str(error))
                 return

@@ -31,8 +31,13 @@
         <div class="sidebar-heading">
           <div>
             <p class="eyebrow">IL TUO SPAZIO CANDIDATURE</p>
+            <h1 id="workspace-title">Il tuo spazio candidature: LinkedIn</h1>
+            <nav class="workspace-switch" aria-label="Seleziona spazio candidature">
+              <button class="workspace-choice selected" type="button" data-workspace="linkedin" aria-pressed="true">LinkedIn</button>
+              <button class="workspace-choice" type="button" data-workspace="openai" aria-pressed="false">Open AI</button>
+            </nav>
             <div class="sidebar-title-row">
-              <h1>Annunci salvati</h1>
+              <h2 id="workspace-list-title">Annunci salvati</h2>
               <button class="button button-outline add-manual-job-button" id="add-manual-job" type="button">Aggiungi</button>
             </div>
           </div>
@@ -70,7 +75,7 @@
         </div>
         <div class="sidebar-footer">
           <span class="shield-icon" aria-hidden="true">◈</span>
-          <span>LinkedIn viene solo letto.<br>L’app non invia le tue lettere.</span>
+          <span id="workspace-footer-note">LinkedIn viene solo letto.<br>L’app non invia le tue lettere.</span>
         </div>
       </aside>
 
@@ -96,6 +101,9 @@
               </div>
               <a class="button button-outline" id="linkedin-link" href="#" target="_blank" rel="noopener noreferrer">
                 Apri annuncio <span aria-hidden="true">↗</span>
+              </a>
+              <a class="button button-outline hidden" id="application-link" href="#" target="_blank" rel="noopener noreferrer">
+                Apri candidatura <span aria-hidden="true">↗</span>
               </a>
               <button class="button button-outline application-sent-button" id="mark-application-sent" type="button">Segna come inviata</button>
             </div>

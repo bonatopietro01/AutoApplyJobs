@@ -22,6 +22,15 @@ DEFAULT_DATABASE_PATH = Path(__file__).resolve().parents[1] / "data" / "jobs.sql
 JOB_STATUSES = ("NEW", "PROCESSED", "IGNORED")
 JOB_ID_PATTERN = re.compile(r"/jobs/view/(\d+)", re.IGNORECASE)
 ACTIVE_JOB_FILTER = "(j.source = 'manual' OR j.linkedin_saved = 1)"
+MAX_PREPARED_TITLE_CHARS = 160
+MAX_PREPARED_COMPANY_CHARS = 160
+MAX_PREPARED_LOCATION_CHARS = 160
+MAX_PREPARED_DESCRIPTION_CHARS = 50_000
+MAX_PREPARED_LETTER_CHARS = 60_000
+MAX_PREPARED_URL_CHARS = 2_000
+MAX_SOURCE_REFERENCE_CHARS = 2_000
+MAX_SOURCE_REFERENCE_COUNT = 50
+MAX_SOURCE_REFERENCE_TOTAL_CHARS = 30_000
 
 
 class JobStoreError(ValueError):
@@ -44,10 +53,15 @@ def normalize_application_url(url: str) -> str:
     """Canonicalize a public HTTPS application URL for stable deduplication."""
     if not isinstance(url, str) or not url.strip():
         raise JobStoreError("An application URL is required.")
-    parsed = urlsplit(url.strip())
+    clean_url = url.strip()
+    if len(clean_url) > MAX_PREPARED_URL_CHARS:
+        raise JobStoreError(f"URLs must be no longer than {MAX_PREPARED_URL_CHARS} characters.")
+    parsed = urlsplit(clean_url)
     host = (parsed.hostname or "").casefold()
     if parsed.scheme.casefold() != "https" or not host or parsed.username or parsed.password:
         raise JobStoreError("Application URLs must be valid public HTTPS URLs.")
+    if (host == "linkedin.com" or host.endswith(".linkedin.com")) and JOB_ID_PATTERN.search(parsed.path):
+        return normalize_linkedin_url(url)
     try:
         port = parsed.port
     except ValueError as error:
@@ -92,7 +106,7 @@ class JobStore:
                 CREATE TABLE IF NOT EXISTS jobs (
                     job_key TEXT PRIMARY KEY,
                     linkedin_job_id TEXT UNIQUE,
-                    normalized_url TEXT NOT NULL UNIQUE,
+                    normalized_url TEXT NOT NULL,
                     title TEXT NOT NULL,
                     company TEXT,
                     location TEXT,
@@ -198,8 +212,84 @@ class JobStore:
                 "ON jobs(source_fingerprint) WHERE source='manual' AND source_fingerprint IS NOT NULL"
             )
             connection.commit()
+            self._migrate_origin_scoped_url_uniqueness(connection)
         finally:
             connection.close()
+
+    @staticmethod
+    def _migrate_origin_scoped_url_uniqueness(connection: sqlite3.Connection) -> None:
+        """Allow one canonical URL per preparation origin, preserving related rows."""
+        unique_url_index = False
+        for index in connection.execute("PRAGMA index_list(jobs)").fetchall():
+            if not int(index["unique"]):
+                continue
+            columns = [str(column["name"]) for column in connection.execute(
+                f"PRAGMA index_info('{str(index['name']).replace(chr(39), chr(39) * 2)}')"
+            ).fetchall()]
+            if columns == ["normalized_url"]:
+                unique_url_index = True
+                break
+
+        if unique_url_index:
+            connection.commit()
+            connection.execute("PRAGMA foreign_keys = OFF")
+            try:
+                connection.execute("BEGIN IMMEDIATE")
+                connection.execute("""CREATE TABLE jobs_origin_migration (
+                    job_key TEXT PRIMARY KEY,
+                    linkedin_job_id TEXT UNIQUE,
+                    normalized_url TEXT NOT NULL,
+                    title TEXT NOT NULL,
+                    company TEXT,
+                    location TEXT,
+                    linkedin_url TEXT NOT NULL,
+                    description TEXT NOT NULL,
+                    description_complete INTEGER NOT NULL CHECK (description_complete IN (0, 1)),
+                    status TEXT NOT NULL DEFAULT 'NEW' CHECK (status IN ('NEW', 'PROCESSED', 'IGNORED')),
+                    first_saved_at TEXT NOT NULL,
+                    last_seen_at TEXT NOT NULL,
+                    last_changed_at TEXT NOT NULL DEFAULT '',
+                    suppress_auto_generation INTEGER NOT NULL DEFAULT 0 CHECK (suppress_auto_generation IN (0, 1)),
+                    linkedin_saved INTEGER NOT NULL DEFAULT 1 CHECK (linkedin_saved IN (0, 1)),
+                    source TEXT NOT NULL DEFAULT 'linkedin' CHECK (source IN ('linkedin', 'manual')),
+                    source_fingerprint TEXT,
+                    origin TEXT NOT NULL DEFAULT 'linkedin' CHECK (origin IN ('linkedin', 'manual', 'chatgpt')),
+                    application_url TEXT NOT NULL DEFAULT '',
+                    application_status TEXT NOT NULL DEFAULT 'NOT_APPLIED'
+                        CHECK (application_status IN ('NOT_APPLIED', 'APPLIED', 'REJECTED')),
+                    application_status_updated_at TEXT NOT NULL DEFAULT '',
+                    source_references TEXT NOT NULL DEFAULT '[]'
+                )""")
+                columns = (
+                    "job_key,linkedin_job_id,normalized_url,title,company,location,linkedin_url,description,"
+                    "description_complete,status,first_saved_at,last_seen_at,last_changed_at,"
+                    "suppress_auto_generation,linkedin_saved,source,source_fingerprint,origin,application_url,"
+                    "application_status,application_status_updated_at,source_references"
+                )
+                connection.execute(
+                    f"INSERT INTO jobs_origin_migration ({columns}) SELECT {columns} FROM jobs"
+                )
+                connection.execute("DROP TABLE jobs")
+                connection.execute("ALTER TABLE jobs_origin_migration RENAME TO jobs")
+                connection.execute(
+                    "CREATE INDEX idx_jobs_status_first_saved ON jobs(status, first_saved_at DESC)"
+                )
+                connection.execute("CREATE INDEX idx_jobs_title_company ON jobs(title, company)")
+                connection.execute(
+                    "CREATE UNIQUE INDEX idx_manual_job_fingerprint "
+                    "ON jobs(source_fingerprint) WHERE source='manual' AND source_fingerprint IS NOT NULL"
+                )
+                connection.commit()
+            except Exception:
+                connection.rollback()
+                raise
+            finally:
+                connection.execute("PRAGMA foreign_keys = ON")
+
+        connection.execute(
+            "CREATE UNIQUE INDEX IF NOT EXISTS idx_jobs_origin_normalized_url ON jobs(origin, normalized_url)"
+        )
+        connection.commit()
 
     def _connection(self) -> sqlite3.Connection:
         connection = sqlite3.connect(self.database_path, timeout=10)
@@ -342,7 +432,8 @@ class JobStore:
                 ]
                 existing = connection.execute(
                     """SELECT * FROM jobs
-                       WHERE job_key = ? OR linkedin_job_id = ? OR normalized_url = ?""",
+                       WHERE job_key = ? OR linkedin_job_id = ?
+                          OR (normalized_url = ? AND origin != 'chatgpt')""",
                     (key, linkedin_job_id, record[2]),
                 ).fetchone()
                 if existing:
@@ -690,6 +781,17 @@ class JobStore:
             "SELECT * FROM jobs WHERE linkedin_job_id = ? OR job_key = ?", (job_id, job_id)
         )
 
+    def get_chatgpt_job_by_url(self, url: str) -> dict[str, object] | None:
+        """Return a compact ChatGPT-origin match for one canonical announcement URL."""
+        canonical_url = normalize_application_url(url)
+        legacy_url = canonical_url.rstrip("/")
+        return self._fetch_one(
+            """SELECT linkedin_job_id, origin, title, company, normalized_url FROM jobs
+               WHERE origin='chatgpt' AND normalized_url IN (?,?)
+               ORDER BY CASE WHEN normalized_url=? THEN 0 ELSE 1 END LIMIT 1""",
+            (canonical_url, legacy_url, canonical_url),
+        )
+
     def create_manual_job(
         self,
         description: str,
@@ -769,19 +871,25 @@ class JobStore:
 
     def create_chatgpt_job(
         self, *, title: str, company: str, location: str, description: str,
-        application_url: str, cover_letter_text: str, role_analysis: str = "",
+        application_url: str, cover_letter_text: str, job_url: str | None = None,
+        role_analysis: str = "",
         company_analysis: str = "", personalization_notes: str = "",
         source_references: list[str] | None = None,
         document_contents: dict[str, bytes] | None = None,
     ) -> tuple[dict[str, object], bool]:
         """Persist one prepared ChatGPT opportunity without queueing API generation."""
-        canonical_url = normalize_application_url(application_url)
+        announcement_url = application_url if job_url is None or (isinstance(job_url, str) and not job_url.strip()) else job_url
+        canonical_url = normalize_application_url(announcement_url)
+        canonical_application_url = normalize_application_url(application_url)
         values = {"title": title, "company": company, "location": location,
                   "description": description, "cover_letter_text": cover_letter_text,
                   "role_analysis": role_analysis, "company_analysis": company_analysis,
                   "personalization_notes": personalization_notes}
-        limits = {"title": 160, "company": 160, "location": 160,
-                  "description": 50_000, "cover_letter_text": 60_000,
+        limits = {"title": MAX_PREPARED_TITLE_CHARS,
+                  "company": MAX_PREPARED_COMPANY_CHARS,
+                  "location": MAX_PREPARED_LOCATION_CHARS,
+                  "description": MAX_PREPARED_DESCRIPTION_CHARS,
+                  "cover_letter_text": MAX_PREPARED_LETTER_CHARS,
                   "role_analysis": 20_000, "company_analysis": 20_000,
                   "personalization_notes": 20_000}
         clean: dict[str, str] = {}
@@ -798,8 +906,10 @@ class JobStore:
             raise JobStoreError("The complete job description is required.")
         if "\x00" in clean["description"] or "\x00" in clean["cover_letter_text"]:
             raise JobStoreError("Job text contains invalid characters.")
-        references = source_references or []
-        if not isinstance(references, list) or any(not isinstance(item, str) or len(item) > 2000 for item in references):
+        references = [] if source_references is None else source_references
+        if (not isinstance(references, list) or len(references) > MAX_SOURCE_REFERENCE_COUNT or
+                any(not isinstance(item, str) or len(item) > MAX_SOURCE_REFERENCE_CHARS for item in references) or
+                sum(len(item) for item in references if isinstance(item, str)) > MAX_SOURCE_REFERENCE_TOTAL_CHARS):
             raise JobStoreError("source_references must be a list of text URLs or citations.")
         documents = document_contents or {}
         if document_contents is not None and set(documents) != {"pdf", "docx"}:
@@ -814,7 +924,12 @@ class JobStore:
         final_directory: Path | None = None
         try:
             connection.execute("BEGIN IMMEDIATE")
-            duplicate = connection.execute("SELECT * FROM jobs WHERE normalized_url=?", (canonical_url,)).fetchone()
+            legacy_url = canonical_url.rstrip("/")
+            duplicate = connection.execute(
+                "SELECT * FROM jobs WHERE origin='chatgpt' AND normalized_url IN (?,?) "
+                "ORDER BY CASE WHEN normalized_url=? THEN 0 ELSE 1 END LIMIT 1",
+                (canonical_url, legacy_url, canonical_url),
+            ).fetchone()
             if duplicate is not None:
                 connection.commit()
                 return _serialize_row(duplicate), False
@@ -824,9 +939,10 @@ class JobStore:
                    linkedin_url,description,description_complete,status,first_saved_at,last_seen_at,last_changed_at,
                    suppress_auto_generation,linkedin_saved,source,origin,application_url,application_status,
                    application_status_updated_at,source_references)
-                   VALUES (?,?,?,?,?,?, '', ?,1,'NEW',?,?,?,1,0,'manual','chatgpt',?,'NOT_APPLIED','',?)""",
+                   VALUES (?,?,?,?,?,?, ?, ?,1,'NEW',?,?,?,1,0,'manual','chatgpt',?,'NOT_APPLIED','',?)""",
                 (local_id, local_id, canonical_url, clean["title"], clean["company"], clean["location"],
-                 clean["description"], now, now, now, canonical_url, json.dumps(references, ensure_ascii=False)),
+                 canonical_url, clean["description"], now, now, now, canonical_application_url,
+                 json.dumps(references, ensure_ascii=False)),
             )
             connection.execute(
                 """INSERT INTO job_materials (linkedin_job_id,company_analysis,role_analysis,
@@ -972,15 +1088,25 @@ class JobStore:
             connection.close()
 
     def get_dashboard_jobs(
-        self, *, query: str = "", status: str | None = None, limit: int = 1000
+        self, *, query: str = "", status: str | None = None, limit: int = 1000,
+        workspace: str | None = None,
     ) -> list[dict[str, object]]:
         """Return compact job rows and letter counts for the local dashboard."""
         if limit < 1 or limit > 1000:
             raise JobStoreError("limit must be between 1 and 1000.")
         if status is not None and status not in JOB_STATUSES:
             raise JobStoreError(f"status must be one of: {', '.join(JOB_STATUSES)}.")
+        if workspace not in (None, "linkedin", "openai"):
+            raise JobStoreError("workspace must be linkedin or openai.")
         query = query.strip()
         pattern = f"%{query}%" if query else None
+        workspace_filter = ""
+        parameters: list[object] = [status, status]
+        if workspace == "openai":
+            workspace_filter = "AND j.origin='chatgpt'"
+        elif workspace == "linkedin":
+            workspace_filter = "AND j.origin!='chatgpt'"
+        parameters.extend((pattern, pattern, pattern, pattern, pattern, limit))
         return self._fetch_all(
             f"""SELECT j.linkedin_job_id, j.linkedin_job_id AS job_id, j.source, j.origin,
                       j.title, j.company, j.location,
@@ -996,6 +1122,7 @@ class JobStore:
                LEFT JOIN cover_letters AS c ON c.linkedin_job_id = j.linkedin_job_id
                 WHERE {ACTIVE_JOB_FILTER}
                   AND (? IS NULL OR j.status = ?)
+                  {workspace_filter}
                  AND (? IS NULL OR j.title LIKE ? COLLATE NOCASE
                       OR j.company LIKE ? COLLATE NOCASE
                       OR j.location LIKE ? COLLATE NOCASE
@@ -1004,7 +1131,7 @@ class JobStore:
                ORDER BY CASE j.status WHEN 'NEW' THEN 0 WHEN 'PROCESSED' THEN 1 ELSE 2 END,
                         j.first_saved_at DESC, j.title COLLATE NOCASE
                LIMIT ?""",
-            (status, status, pattern, pattern, pattern, pattern, pattern, limit),
+            tuple(parameters),
         )
 
     def get_linkedin_job_ids(self, *, include_unsaved: bool = False) -> set[str]:

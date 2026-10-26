@@ -1,6 +1,6 @@
 "use strict";
 
-const state = { jobs: [], selectedId: null, detail: null, toastTimer: null, searchTimer: null, dirty: false, materialsRevision: 0, detailRequest: 0, lastSearch: "", lastStatus: "", sortOrder: "newest", profileHasCv: false, directoryHandle: null, aiSettings: null, aiAgents: [], aiModels: [], aiKeyConfigured: false, diagnosticEvents: [], diagnosticSince: new Date().toISOString(), knowledgeCount: 0, bulkPlanToken: null, bulkBatchId: null, bulkPollTimer: null };
+const state = { jobs: [], selectedId: null, detail: null, toastTimer: null, searchTimer: null, dirty: false, materialsRevision: 0, detailRequest: 0, jobsRequest: 0, workspace: "linkedin", lastWorkspace: "linkedin", lastSearch: "", lastStatus: "", sortOrder: "newest", profileHasCv: false, directoryHandle: null, aiSettings: null, aiAgents: [], aiModels: [], aiKeyConfigured: false, diagnosticEvents: [], diagnosticSince: new Date().toISOString(), knowledgeCount: 0, bulkPlanToken: null, bulkBatchId: null, bulkPollTimer: null };
 const byId = (id) => document.getElementById(id);
 const jobIdentity = (job) => String(job?.job_id || job?.linkedin_job_id || "");
 const DIRECTORY_DB_NAME = "job-letter-studio-settings";
@@ -169,13 +169,71 @@ function initializeJobSorting() {
   });
 }
 
+function initializeWorkspace() {
+  const requested = new URLSearchParams(window.location.search).get("workspace");
+  let saved = "linkedin";
+  try {
+    const stored = localStorage.getItem("job-letter-studio-workspace");
+    if (["linkedin", "openai"].includes(stored)) saved = stored;
+  } catch { /* The LinkedIn space remains the default when storage is unavailable. */ }
+  state.workspace = ["linkedin", "openai"].includes(requested) ? requested : saved;
+  state.lastWorkspace = state.workspace;
+  renderWorkspaceChrome();
+}
+
+function renderWorkspaceChrome() {
+  const openai = state.workspace === "openai";
+  byId("workspace-title").textContent = `Il tuo spazio candidature: ${openai ? "Open AI" : "LinkedIn"}`;
+  byId("workspace-list-title").textContent = openai ? "Cover letter preparate" : "Annunci salvati";
+  for (const button of document.querySelectorAll(".workspace-choice")) {
+    const selected = button.dataset.workspace === state.workspace;
+    button.classList.toggle("selected", selected);
+    button.setAttribute("aria-pressed", String(selected));
+  }
+  byId("add-manual-job").hidden = openai;
+  byId("sync-button").hidden = openai;
+  byId("workspace-footer-note").textContent = openai
+    ? "Qui trovi le lettere preparate da ChatGPT. L’invio resta manuale."
+    : "LinkedIn viene solo letto. L’app non invia le tue lettere.";
+}
+
+async function switchWorkspace(nextWorkspace) {
+  if (!["linkedin", "openai"].includes(nextWorkspace) || nextWorkspace === state.workspace) return;
+  const previousWorkspace = state.workspace;
+  state.workspace = nextWorkspace;
+  state.detailRequest += 1;
+  renderWorkspaceChrome();
+  try {
+    const result = await loadJobs({ preserveSelection: false });
+    if (result === false) {
+      state.workspace = previousWorkspace;
+      renderWorkspaceChrome();
+      renderJobs();
+      return;
+    }
+    if (result === null) return;
+    state.lastWorkspace = nextWorkspace;
+    try { localStorage.setItem("job-letter-studio-workspace", nextWorkspace); } catch { /* The selector remains usable for this session. */ }
+    const params = new URLSearchParams(window.location.search);
+    params.set("workspace", nextWorkspace);
+    window.history.replaceState(null, "", `${window.location.pathname}?${params.toString()}${window.location.hash}`);
+  } catch (error) {
+    state.workspace = previousWorkspace;
+    renderWorkspaceChrome();
+    renderJobs();
+    showToast(error, true);
+  }
+}
+
 function renderJobs() {
   const list = byId("job-list");
   list.replaceChildren();
   byId("job-count").textContent = String(state.jobs.length);
   byId("result-count").textContent = state.jobs.length ? `${state.jobs.length} risultati` : "";
   if (!state.jobs.length) {
-    list.append(element("p", "list-empty", "Nessun annuncio corrisponde alla ricerca. Prova a cambiare filtro."));
+    list.append(element("p", "list-empty", state.workspace === "openai"
+      ? "Le offerte con cover letter preparate da ChatGPT appariranno qui dopo il salvataggio nell’app."
+      : "Nessun annuncio corrisponde alla ricerca. Prova a cambiare filtro."));
     return;
   }
 
@@ -237,20 +295,24 @@ function renderJobs() {
 }
 
 async function loadJobs({ preserveSelection = true } = {}) {
+  const requestId = ++state.jobsRequest;
+  const workspace = state.workspace;
   const params = new URLSearchParams();
   const query = byId("search-input").value.trim();
   const status = byId("status-filter").value;
+  params.set("workspace", workspace);
   if (query) params.set("q", query);
   if (status) params.set("status", status);
   byId("job-list").replaceChildren(element("div", "loading-state", "Carico gli annunci salvati…"));
   const payload = await request(`/api/jobs?${params}`);
+  if (requestId !== state.jobsRequest || workspace !== state.workspace) return null;
   const nextJobs = payload.jobs;
   const visibleSelection = nextJobs.some((job) => jobIdentity(job) === state.selectedId);
   if (state.dirty && nextJobs.length && !visibleSelection) {
     if (!window.confirm("Hai modifiche non salvate per l’annuncio selezionato. Scartarle e cambiare annuncio?")) {
       byId("search-input").value = state.lastSearch;
       byId("status-filter").value = state.lastStatus;
-      return loadJobs({ preserveSelection: true });
+      return false;
     }
     state.dirty = false;
   }
@@ -258,12 +320,13 @@ async function loadJobs({ preserveSelection = true } = {}) {
     if (!window.confirm("La ricerca non mostra annunci e hai modifiche non salvate. Scartarle?")) {
       byId("search-input").value = state.lastSearch;
       byId("status-filter").value = state.lastStatus;
-      return loadJobs({ preserveSelection: true });
+      return false;
     }
     state.dirty = false;
   }
   state.lastSearch = query;
   state.lastStatus = status;
+  state.lastWorkspace = workspace;
   state.jobs = nextJobs;
   renderJobs();
   if (!state.jobs.length) {
@@ -271,11 +334,12 @@ async function loadJobs({ preserveSelection = true } = {}) {
     state.detail = null;
     byId("job-detail").classList.add("hidden");
     byId("empty-selection").classList.remove("hidden");
-    return;
+    return true;
   }
   const selectionIsVisible = state.jobs.some((job) => jobIdentity(job) === state.selectedId);
   if (!preserveSelection || !selectionIsVisible) await selectJob(jobIdentity(state.jobs[0]));
   else renderJobs();
+  return true;
 }
 
 async function createManualJob(event) {
@@ -329,10 +393,11 @@ async function selectJob(jobId) {
   state.chatProposal = null;
   state.selectedId = jobId;
   const detailRequest = ++state.detailRequest;
+  const workspace = state.workspace;
   renderJobs();
   try {
     const detail = await request(`/api/jobs/${encodeURIComponent(jobId)}`);
-    if (state.selectedId !== jobId || state.detailRequest !== detailRequest) return;
+    if (state.selectedId !== jobId || state.detailRequest !== detailRequest || state.workspace !== workspace) return;
     state.detail = detail;
     renderDetail(!state.dirty);
   } catch (error) {
@@ -402,14 +467,24 @@ function renderDetail(scroll = false) {
   byId("generation-gaps").textContent = generation?.gaps ? `Da verificare: ${generation.gaps}` : "";
   byId("generation-gaps").classList.toggle("hidden", !generation?.gaps);
   const link = byId("linkedin-link");
-  const applicationUrl = job.application_url || job.linkedin_url;
-  if (!applicationUrl) {
+  const isWebUrl = (value) => typeof value === "string" && /^https:\/\//i.test(value);
+  const announcementUrl = [job.linkedin_url, job.normalized_url, job.application_url].find(isWebUrl) || "";
+  if (!announcementUrl) {
     link.removeAttribute("href");
     link.classList.add("hidden");
   } else {
-    link.href = applicationUrl;
+    link.href = announcementUrl;
     link.setAttribute("aria-label", `Apri annuncio: ${job.title}`);
     link.classList.remove("hidden");
+  }
+  const applicationLink = byId("application-link");
+  if (isWebUrl(job.application_url) && job.application_url !== announcementUrl) {
+    applicationLink.href = job.application_url;
+    applicationLink.setAttribute("aria-label", `Apri candidatura: ${job.title}`);
+    applicationLink.classList.remove("hidden");
+  } else {
+    applicationLink.removeAttribute("href");
+    applicationLink.classList.add("hidden");
   }
   const applicationSent = job.application_status === "APPLIED";
   byId("application-status-label").textContent = `Stato candidatura: ${applicationSent ? "inviata" : job.application_status === "REJECTED" ? "rifiutata" : "non inviata"}`;
@@ -2303,6 +2378,9 @@ function initializeSettingsAccordions() {
 }
 
 byId("sync-button").addEventListener("click", startLinkedInSync);
+for (const button of document.querySelectorAll(".workspace-choice")) {
+  button.addEventListener("click", () => void switchWorkspace(button.dataset.workspace));
+}
 byId("add-manual-job").addEventListener("click", () => {
   byId("manual-job-feedback").textContent = "";
   byId("manual-job-feedback").className = "inline-feedback manual-job-feedback";
@@ -2443,6 +2521,7 @@ byId("status-filter").addEventListener("change", () => loadJobs().catch((error) 
 async function initializeDashboard() {
   initializeSettingsAccordions();
   initializeJobSorting();
+  initializeWorkspace();
   try {
     state.directoryHandle = await readDirectoryHandle();
   } catch (error) {
