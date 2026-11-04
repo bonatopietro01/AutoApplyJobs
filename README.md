@@ -1,10 +1,93 @@
 # LinkedIn Job Connector
 
-LinkedIn Job Connector reads jobs that the user has manually saved on LinkedIn,
-stores a local snapshot in SQLite, and exposes that snapshot through MCP. Its
-local dashboard can generate per-job analysis and cover letters through the
-user's own OpenAI API key. It does not apply to jobs, store LinkedIn credentials,
-bypass security checks, or perform mass scraping.
+<div align="center">
+  <p><strong>Job Letter Studio · your local job-search workspace</strong></p>
+  <p>Save opportunities. Understand the role. Prepare a cover letter you can review.</p>
+  <p>
+    <img src="https://img.shields.io/badge/Python-application-3776AB?logo=python&logoColor=white" alt="Python application" />
+    <img src="https://img.shields.io/badge/SQLite-local%20database-003B57?logo=sqlite&logoColor=white" alt="SQLite local database" />
+    <img src="https://img.shields.io/badge/OpenAI-opt--in-412991?logo=openai&logoColor=white" alt="Optional OpenAI integration" />
+    <img src="https://img.shields.io/badge/MCP-connected-6554C0" alt="MCP integration" />
+    <img src="https://img.shields.io/badge/Dashboard-localhost-2E8B57" alt="Local dashboard" />
+  </p>
+</div>
+
+> **Names:** Job Letter Studio is the dashboard brand; LinkedIn Job Connector is the repository and CLI name.
+
+Read jobs you have manually saved on LinkedIn, keep a local SQLite snapshot,
+and review jobs in the dashboard or through MCP. With your own OpenAI API key
+and explicit consent, the dashboard can research opportunities and prepare
+editable cover-letter drafts with PDF and Word versions.
+
+> [!IMPORTANT]
+> This app prepares and stores drafts; it does not submit applications. LinkedIn
+> sign-in and security prompts stay manual, and the saved-jobs list refreshes
+> only when you explicitly ask it to.
+
+## At a glance
+
+| Capture | Review | Prepare | Connect |
+| --- | --- | --- | --- |
+| Read your saved LinkedIn jobs through a dedicated, visible browser profile. | Keep a local SQLite snapshot with `NEW`, `PROCESSED`, and `IGNORED` states. | Review role and company research, edit letters, and archive PDF/DOCX versions. | Use MCP tools or save ChatGPT-prepared applications in the separate “Open AI” space. |
+
+Automatic AI processing is optional. It queues imported or changed jobs only
+after you configure your own API key and explicitly enable consent and
+automation.
+
+## Workflow at a glance
+
+```mermaid
+flowchart LR
+  LI[LinkedIn Saved jobs] -->|explicit read| Browser[Visible Chrome or Edge session]
+  Browser -->|sync| DB[(Local SQLite snapshot)]
+  DB --> Dashboard[Job Letter Studio dashboard<br/>127.0.0.1]
+  Dashboard -->|optional, with consent and your key| API[OpenAI Responses API]
+  API --> Dashboard
+  Client[ChatGPT or another MCP host] -->|MCP tools| MCP[Local MCP server]
+  MCP --> DB
+```
+
+The MCP server reads the local snapshot; it does not open LinkedIn or refresh
+the saved list during a tool call. ChatGPT's custom MCP connection needs a
+remote route such as OpenAI Secure MCP Tunnel; the local server itself has no
+HTTP port by default.
+
+## Where your data goes
+
+| Data | Handling |
+| --- | --- |
+| Jobs, CV, context, and letters | Stored in the local app data directory, which is ignored by Git. A cloud-sync service such as OneDrive may still sync that folder. |
+| AI requests | When you enable processing, the app sends the selected job and candidate material needed for that request to OpenAI. |
+| ChatGPT via MCP | Only the tool results requested by ChatGPT are sent to ChatGPT; review the profile and examples before connecting. |
+| Applications | Drafts stay for your review. The app does not fill or submit applications. |
+
+## Quick start
+
+For Windows setup, follow [Setup on Windows](#setup-on-windows), then run these
+commands from the project directory:
+
+```powershell
+.\.venv\Scripts\python.exe main.py
+.\.venv\Scripts\python.exe main.py --sync-saved-jobs
+.\.venv\Scripts\python.exe main.py --dashboard
+```
+
+Sign in only in the dedicated visible browser profile. Complete any CAPTCHA,
+2FA, or security prompt yourself. The dashboard listens on `127.0.0.1` (port
+8765 by default). Keep `browser_profile/`, `data/`, and local session files
+private; they are not files to share or commit.
+
+## Contents
+
+- [Setup on Windows](#setup-on-windows)
+- [Authenticate](#authenticate)
+- [Read jobs](#read-jobs)
+- [Sync to SQLite](#sync-to-sqlite)
+- [Local dashboard and AI workflow](#local-dashboard)
+- [Optional local Laya model](#local-laya-decisions-automatic-when-available)
+- [MCP server](#mcp-server)
+- [Connect ChatGPT](#connect-to-chatgpt)
+- [Developer checks](#checks)
 
 ## Status
 
@@ -63,6 +146,9 @@ passed explicitly to the writer. The Reviewer still receives the full CV and
 candidate context and can restore relevant evidence omitted from the compact
 writing packet. Cover-letter examples are style references only, never evidence
 about the candidate.
+
+<details>
+<summary><strong>Install Laya and read the detailed behavior</strong></summary>
 
 Install the optional runtime in the application's environment:
 
@@ -141,6 +227,8 @@ regeneration starts a new run.
 SDK/model references: [Laya runtime](https://github.com/NandhaKishorM/laya),
 [Laya 0.3.21 package and batch API](https://pypi.org/project/laya/0.3.21/),
 [multilingual model card and license](https://huggingface.co/convaiinnovations/laya-multilingual).
+
+</details>
 
 ## Authenticate
 
