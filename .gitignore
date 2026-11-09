@@ -20,3 +20,6 @@ data/
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Local launcher shortcut
+Job Letter Studio.lnk

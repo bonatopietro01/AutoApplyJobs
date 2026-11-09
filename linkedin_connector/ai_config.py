@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any
 
 
-MODELS = ("gpt-5.6-luna", "gpt-4.1-nano", "gpt-4o-mini", "gpt-4.1-mini", "gpt-5-mini")
+MODELS = ("gpt-5.6", "gpt-5.6-luna", "gpt-4.1-nano", "gpt-4o-mini", "gpt-4.1-mini", "gpt-5-mini")
 ENV_API_KEY = "LINKEDIN_CONNECTOR_OPENAI_API_KEY"
 SETTINGS_FIELDS = {
     "provider", "model", "enabled", "consent", "max_per_cycle",
@@ -30,7 +30,7 @@ class AIConfigurationError(ValueError):
 
 
 def default_settings() -> dict[str, Any]:
-    return {"provider": "openai", "model": "gpt-5.6-luna", "enabled": False,
+    return {"provider": "openai", "model": "gpt-5.6", "enabled": False,
             "consent": False, "max_per_cycle": 5, "web_research_enabled": True,
             "max_daily_calls": 200, "max_daily_agent_calls": 200,
             "max_daily_research_calls": 20,

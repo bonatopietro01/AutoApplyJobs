@@ -1,6 +1,6 @@
 ---
 name: pipeline-benchmark
-description: Costruisci casi ripetibili, misura una pipeline di agenti e trasferisci risultati verificabili a chi ne migliora i prompt. Usala per benchmark, confronti tra versioni e diagnosi dei passaggi di consegne.
+description: Costruisci casi ripetibili e misura una pipeline quando l'utente richiede esplicitamente un benchmark o un confronto empirico tra versioni; trasferisci risultati verificabili a chi ne migliora i prompt. Un confronto statico tra testi o una richiesta generica di valutazione non attivano il benchmark.
 ---
 
 # Benchmark di pipeline e trasferimento dei risultati
@@ -27,7 +27,7 @@ Se importi tracce reali, indica origine, versione e completezza: puoi analizzarl
 2. Congela baseline e candidata con revisione o hash dei prompt, skills e configurazione del flusso. Registra anche revisione del progetto, modelli e impostazioni note, tool, contesto, cache, dataset e rubrica. Distingui la sequenza documentata da quella osservata nelle tracce.
 3. Fissa prima dei risultati errori critici, soglie, obiettivo di miglioramento e compromessi ammessi. Se mancano soglie, usa come criterio iniziale: nessun nuovo errore critico, nessuna perdita di requisiti essenziali, qualità e affidabilità almeno pari alla baseline, un miglioramento osservato nella dimensione scelta e nessun peggioramento materiale nelle altre dimensioni misurate. Specifica tolleranze e incertezza; senza confronto sufficiente usa `DATI INSUFFICIENTI`.
 4. Usa ambienti isolati, dati di prova e lo stesso stato iniziale per ogni caso e versione. Per task che cambiano codice, riparti dalla stessa copia: una variante non deve ereditare i fix dell'altra. Mantieni equivalenti contesto, disponibilità dei tool e condizioni della cache; separa cache fredda e calda se pertinenti. Annotazioni divergenti o fonti esterne mutate limitano il confronto.
-5. Rispetta budget e permessi già concessi. La richiesta di benchmark comprende verifiche pertinenti e raccolta delle misure nell'ambiente autorizzato; non richiedere conferme per ogni passaggio già autorizzato. Per chiamate a pagamento senza budget o effetti esterni non autorizzati, chiedi soltanto il vincolo mancante e continua il lavoro indipendente.
+5. Rispetta budget e permessi già concessi. Una richiesta esplicita di benchmark autorizza le misure e i controlli pertinenti entro lo scope, il budget e l'ambiente indicati; non richiedere conferme per ogni passaggio già coperto. Non estendere tale autorizzazione a test, build, typecheck, lint o runtime estranei alla domanda. Per chiamate a pagamento senza budget o effetti esterni non autorizzati, chiedi soltanto il vincolo mancante e continua il lavoro indipendente.
 
 ## Dataset e rubriche
 

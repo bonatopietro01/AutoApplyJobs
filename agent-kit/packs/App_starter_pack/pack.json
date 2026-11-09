@@ -1,0 +1,6 @@
+{
+  "schema": 1,
+  "id": "app-starter-pack",
+  "phases": {"project": ["prompt-agent", "app-starter", "architect", "backend", "frontend", "ai-engineer", "reviewer"]},
+  "skills": ["agent-configuration", "requirement-traceability", "project-graph-context", "pipeline-benchmark", "grilling", "handoff", "writing-for-agents", "codebase-design", "retro", "investigate-first", "safe-refactor", "folder-structure"]
+}

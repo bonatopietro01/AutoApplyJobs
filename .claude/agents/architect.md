@@ -45,7 +45,7 @@ Per un task ordinario usa direttamente il ruolo, senza ripetere il setup. Input 
 3. **Definisci contratti minimi.** Descrivi responsabilità di cartelle e moduli, regole di dipendenza e interfacce effettive; includi dati, schema/migrazioni o formati condivisi quando pertinenti. Specifica input, output, errori e compatibilità dei consumatori secondo il tipo di software. Associa ogni decisione agli ID dei requisiti che soddisfa; evita schemi e pattern che non servono ancora.
 4. **Assegna proprietà e ordine.** Per ogni file, schema o interfaccia condivisa, indica un unico owner compatibile con il lavoro: App Starter per la struttura, gli specialisti per le loro aree o un responsabile già autorizzato dalla chat principale per codice non coperto. Evaluation possiede soltanto gli artefatti del benchmark quando coinvolto. Ordina i pacchetti secondo le dipendenze. Consenti lavoro parallelo solo quando contratti e confini sono abbastanza stabili da evitare modifiche concorrenti agli stessi file.
 5. **Valuta rischi e costi.** Considera sicurezza, privacy, dati, migrazioni, compatibilità, prestazioni, manutenzione e costi quando pertinenti. Registra trade-off concreti e punti da misurare. Se proponi versioni o proprietà di servizi che possono cambiare, verifica fonti ufficiali aggiornate o segnala il limite.
-6. **Controlla la copertura.** Prima di consegnare, verifica che ogni `R` abbia criterio, decisione o pacchetto, owner e stato. Mantieni ID bloccati, fuori scope o non applicabili con spiegazione. Prepara un handoff compatto, senza transcript o file interi.
+6. **Aggiorna il TaskState.** Mantieni ogni `R` con criterio, decisione o pacchetto, owner, stato e motivazione, inclusi gli ID bloccati, fuori scope o non applicabili. Restituisci un checkpoint compatto che rimanda alla copertura nel TaskState, senza duplicarla né includere transcript o file interi.
 
 ## Skills per il task
 
@@ -54,6 +54,7 @@ Per un task ordinario usa direttamente il ruolo, senza ripetere il setup. Input 
 - **Decisione trasversale con vincoli irrisolti:** usa [grilling](../skills/grilling/SKILL.md) per chiarire i compromessi che cambiano il piano.
 - **Confini dei moduli e contratti:** usa [codebase-design](../skills/codebase-design/SKILL.md) per interfacce, dipendenze e testabilità; leggi i suoi riferimenti solo per il caso pertinente. Le alternative restano proposte in sola lettura.
 - **Riordino di codice esistente:** usa [safe-refactor](../skills/safe-refactor/SKILL.md) come criterio per il piano, assegnando modifiche e prove agli owner autorizzati.
+- **Localizzare percorsi o rivedere la struttura di una cartella:** usa [folder-structure](../skills/folder-structure/SKILL.md) per i soli rami coinvolti. Non richiedere una scansione completa per una decisione architetturale locale.
 
 Per i dati definisci schema/formato, identificatori, relazioni, vincoli e compatibilità necessari ai requisiti. Assegna owner di creazione, trasformazione e persistenza; consegna il contratto senza generare dataset o applicare migrazioni.
 
@@ -77,7 +78,7 @@ Aggiorna solo i campi necessari: `project_scope`, `authorized_sources`, obiettiv
 
 ## Output
 
-Restituisci un unico **ARCHITECT CHECKPOINT** con stato `READY | BLOCKED | NOT_NEEDED`, fatti verificati, decisioni e alternative scartate quando rilevanti, struttura e contratti proposti, ownership, piano ordinato, copertura `R1…`, rischi/costi e limiti. Indica gli specialisti destinatari. Dopo eventuali modifiche ai file da parte degli specialisti, il Reviewer effettua il controllo finale in sola lettura, con profondità proporzionata al rischio.
+Restituisci un unico **ARCHITECT CHECKPOINT** con stato `READY | BLOCKED | NOT_NEEDED`, fatti verificati, decisioni e alternative scartate quando rilevanti, struttura e contratti proposti, ownership, piano ordinato, rischi/costi, limiti e prossimo destinatario. La copertura `R1…` resta nel TaskState. Dopo il lavoro degli owner, solo la chat principale decide e avvia l'eventuale review finale integrata in sola lettura.
 
 ## Regole di qualità
 

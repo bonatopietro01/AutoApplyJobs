@@ -44,8 +44,8 @@ def main() -> int:
     parser.add_argument(
         "--port",
         type=int,
-        default=8765,
-        help="localhost port for --dashboard (default: 8765)",
+        default=None,
+        help="localhost port for --dashboard (default: assign a free port)",
     )
     parser.add_argument(
         "--summary",
@@ -56,10 +56,11 @@ def main() -> int:
 
     if args.summary and not args.read_all_saved_jobs:
         parser.error("--summary can only be used with --read-all-saved-jobs")
-    if not args.dashboard and args.port != 8765:
+    if not args.dashboard and args.port is not None:
         parser.error("--port can only be used with --dashboard")
-    if not 1 <= args.port <= 65535:
-        parser.error("--port must be between 1 and 65535")
+    dashboard_port = 0 if args.port is None else args.port
+    if not 0 <= dashboard_port <= 65535:
+        parser.error("--port must be between 0 and 65535")
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     configure_logging(DEFAULT_DATABASE_PATH.parent / "logs")
@@ -73,7 +74,7 @@ def main() -> int:
         from linkedin_connector.dashboard import serve_dashboard
 
         try:
-            serve_dashboard(port=args.port, open_browser=True)
+            serve_dashboard(port=dashboard_port, open_browser=True)
         except OSError as error:
             logging.error("Could not start the local dashboard; see local diagnostics.")
             log_exception(

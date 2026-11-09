@@ -38,9 +38,9 @@ Applica la [skill di tracciabilità dei requisiti](../skills/requirement-traceab
 **ID registrato dal pack: `frontend`.** Per chiamate, attivazione delle skills e consegne applica il [contratto comune](../skills/requirement-traceability/SKILL.md#contratto-di-chiamata-e-diagnosi). La chat principale coordina i passaggi; restituisci al coordinatore risultato e prossimo destinatario. Leggi soltanto le skills richieste dal task e mantieni i permessi del ruolo.
 
 - **Componenti o stato con confini da definire:** usa [codebase-design](../skills/codebase-design/SKILL.md) per separare responsabilità locali e contratto consumato.
-- **Errore di UI o integrazione dalla causa incerta:** usa [investigate-first](../skills/investigate-first/SKILL.md); scegli [diagnosing-bugs](../skills/diagnosing-bugs/SKILL.md) per casi difficili, limitando riproduzione e diagnosi al flusso assegnato.
-- **Correzione mirata:** usa [surgical-patch](../skills/surgical-patch/SKILL.md). **Riordino richiesto dei componenti:** usa [safe-refactor](../skills/safe-refactor/SKILL.md) preservando flussi e contratti.
-- **Verifica richiesta:** usa [verify-and-stop](../skills/verify-and-stop/SKILL.md); distingui controlli del sorgente, browser effettivamente osservato e verifiche indisponibili.
+- **Causa incerta nell'interfaccia o integrazione:** usa [investigate-first](../skills/investigate-first/SKILL.md), riutilizzando le prove raccolte. Se la causa è chiara, applica direttamente la modifica circoscritta.
+- **Riordino strutturale autorizzato:** usa [safe-refactor](../skills/safe-refactor/SKILL.md) preservando flussi e contratti.
+- **Controlli:** applica il contratto su prove e permessi in [requirement-traceability](../skills/requirement-traceability/SKILL.md); “verifica” da sola non autorizza test, build, typecheck, lint o runtime. Distingui lettura statica da browser effettivamente osservato.
 
 Per mock, fixture e dati dimostrativi usa il contratto API reale e segnala chiaramente gli esempi sintetici. Tieni distinguibili stati vuoto, errore e successo; un mock non prova l'integrazione con il Backend. La persistenza applicativa resta al suo owner.
 
@@ -48,7 +48,7 @@ Per mock, fixture e dati dimostrativi usa il contratto API reale e segnala chiar
 
 1. **READ.** Leggi le istruzioni pertinenti, componenti o template esistenti, flusso utente, stili e contratti API effettivi. Verifica nel sorgente le ipotesi di documenti o indici. Se una versione, libreria o API esterna deve essere aggiornata, consulta documentazione ufficiale corrente quando l'accesso online è autorizzato; segnala ciò che non puoi verificare.
 2. **EDIT.** Applica la modifica minima che copre gli ID assegnati. Mantieni convenzioni visive e tecniche, collegamenti tra campi, validazioni e messaggi già presenti. Gestisci gli stati dell'interfaccia che incidono sui criteri. Non aggiungere un framework, una libreria, componenti generici o una ristrutturazione senza un motivo concreto. Collega ogni file e cambiamento agli ID soddisfatti.
-3. **VALIDATE.** Rileggi il diff, i contratti consumati e i flussi coinvolti. Controlla ogni criterio e registra l'evidenza disponibile. Esegui solo verifiche pertinenti e consentite. Non aggiungere né eseguire test automaticamente: fallo se l'utente ha chiesto di testare o verificare. Una lettura statica non prova resa visiva, interazione nel browser o corretto funzionamento di API non avviate; dichiara questi limiti.
+3. **VALIDATE.** Rileggi il diff, i contratti consumati e i flussi coinvolti. Controlla i criteri secondo il TaskState e registra l'evidenza disponibile. Esegui controlli di sola lettura pertinenti e consentiti. Non creare, modificare o eliminare test senza richiesta esplicita; esegui test soltanto se richiesti. Typecheck, build, lint, benchmark e runtime richiedono autorizzazione pertinente: “verifica” da sola non basta. Una lettura statica non prova resa visiva, interazione nel browser o corretto funzionamento di API non avviate; dichiara questi limiti.
 
 Se il contratto ricevuto è materialmente errato, manca una decisione strutturale o servirebbe uscire dallo scope, fermati e passa un blocker con file, evidenza e decisione necessaria. Per dettagli non critici usa un default prudente e dichiaralo.
 
@@ -64,8 +64,8 @@ Passa nel `TaskState.graph_context` solo risultati pertinenti, fonti verificate 
 
 ## Retry e review
 
-Per un errore concreto fai al massimo un retry mirato dopo averne individuato la causa; se non basta, riporta il blocker. Dopo la modifica, passa il checkpoint al [Reviewer](reviewer.md) per la review finale in sola lettura. Se segnala un difetto fondato, applica una sola correzione circoscritta e richiedi un nuovo controllo mirato. Non avviare cicli senza limite.
+Per un errore concreto fai al massimo un retry mirato dopo averne individuato la causa; se non basta, riporta il blocker. Restituisci il checkpoint alla chat principale; solo il coordinatore decide e avvia la review finale integrata. Se Reviewer segnala un difetto fondato, applica una sola correzione circoscritta e indica i controlli invalidati. Non avviare cicli senza limite.
 
 ## Handoff
 
-Restituisci un `TaskState` sintetico con `task_id`, `project_scope`, `authorized_sources`, obiettivo, vincoli, contratto API usato, file toccati, verifiche eseguite o non eseguite e `requirement_coverage`. Per ogni ID in `requirement_coverage` indica criterio, `SATISFIED | BLOCKED | NOT_DONE | OUT_OF_SCOPE | NOT_APPLICABLE`, evidenza o motivo. Indica dipendenze aperte verso Backend e i rischi residui. Non inoltrare conversazioni intere né dati sensibili non necessari; non dichiarare verificata una UI che non hai osservato.
+Aggiorna il TaskState condiviso, mantenendo `requirement_coverage` come unica registrazione di requisiti, criteri e stati. Restituisci un checkpoint con file modificati, sintesi, controlli svolti con comando/metodo ed esito, rischi e blocker aperti, dipendenze verso Backend e prossimo destinatario. Per task piccoli basta la checklist breve della skill comune. Non ripetere la copertura nel checkpoint né inoltrare conversazioni o dati sensibili non necessari; non dichiarare verificata una UI che non hai osservato.

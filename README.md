@@ -73,9 +73,11 @@ commands from the project directory:
 ```
 
 Sign in only in the dedicated visible browser profile. Complete any CAPTCHA,
-2FA, or security prompt yourself. The dashboard listens on `127.0.0.1` (port
-8765 by default). Keep `browser_profile/`, `data/`, and local session files
-private; they are not files to share or commit.
+2FA, or security prompt yourself. The dashboard listens on `127.0.0.1` and uses
+a free port assigned by the operating system at startup. Pass `--port <port>`
+to select a fixed port; startup fails if that port is occupied. Keep
+`browser_profile/`, `data/`, and local session files private; they are not files
+to share or commit.
 
 ## Contents
 
@@ -282,10 +284,11 @@ writing a partial batch. Database writes are local; `data/` is ignored by Git.
 Oppure fai doppio clic su `avvia_dashboard.bat`.
 
 The command opens the dashboard in your browser and serves it only on
-`127.0.0.1` (port 8765 by default). The left column contains the saved jobs;
-selecting one shows its original LinkedIn description, company and role
-analysis, personalization notes, editable cover-letter text, and files. Search
-and status filters are local.
+`127.0.0.1`, using a free port assigned by the operating system. Pass
+`--port <port>` to choose a fixed port; startup fails if that port is occupied.
+The left column contains the saved jobs; selecting one shows its original
+LinkedIn description, company and role analysis, personalization notes, editable
+cover-letter text, and files. Search and status filters are local.
 
 When the dashboard opens, it reads only the local SQLite snapshot; it does not
 refresh LinkedIn in the background. **Solo nuovi annunci** requires confirmation

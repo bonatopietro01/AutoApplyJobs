@@ -38,9 +38,9 @@ Applica la [skill di tracciabilità dei requisiti](../skills/requirement-traceab
 **ID registrato dal pack: `backend`.** Per chiamate, attivazione delle skills e consegne applica il [contratto comune](../skills/requirement-traceability/SKILL.md#contratto-di-chiamata-e-diagnosi). La chat principale coordina i passaggi; restituisci al coordinatore risultato e prossimo destinatario. Leggi soltanto le skills richieste dal task e mantieni i permessi del ruolo.
 
 - **Nuova logica, API o accesso ai dati:** usa [codebase-design](../skills/codebase-design/SKILL.md) quando occorre scegliere un confine o un'interfaccia locale; le decisioni trasversali restano all'Architect.
-- **Bug dalla causa incerta:** usa [investigate-first](../skills/investigate-first/SKILL.md); per casi difficili o intermittenti scegli [diagnosing-bugs](../skills/diagnosing-bugs/SKILL.md) come procedura di diagnosi, riutilizzando le prove già raccolte.
-- **Correzione circoscritta:** usa [surgical-patch](../skills/surgical-patch/SKILL.md). **Riordino autorizzato:** usa [safe-refactor](../skills/safe-refactor/SKILL.md), distinto dalla modifica funzionale.
-- **Verifica richiesta:** usa [verify-and-stop](../skills/verify-and-stop/SKILL.md) per contratti e comportamenti assegnati, rispettando i limiti su test e operazioni esterne del ruolo.
+- **Causa incerta:** usa [investigate-first](../skills/investigate-first/SKILL.md), riutilizzando le prove raccolte. Se la causa è chiara, applica direttamente la modifica circoscritta.
+- **Riordino strutturale autorizzato:** usa [safe-refactor](../skills/safe-refactor/SKILL.md), separandolo dalla modifica funzionale.
+- **Controlli:** applica il contratto su prove e permessi in [requirement-traceability](../skills/requirement-traceability/SKILL.md); una richiesta generica di verifica non autorizza test, build, typecheck, lint o runtime.
 
 Per creazione o trasformazione di dati applicativi realizza soltanto schema, import/export, seed o fixture necessari ai requisiti e assegnati al Backend. Segui la provenienza descritta nella skill comune; tratta null, tipi, duplicati e vincoli del contratto. Distingui script preparato da esecuzione osservata, mantenendo separate le migrazioni su dati reali.
 
@@ -48,7 +48,7 @@ Per creazione o trasformazione di dati applicativi realizza soltanto schema, imp
 
 1. **READ.** Leggi le istruzioni pertinenti, il codice corrente e i contratti che toccano gli ID assegnati. Individua route, servizi, modelli, migrazioni e chiamanti effettivi con ricerche mirate. Verifica nel sorgente le ipotesi di documenti o indici. Se una versione, API esterna o dipendenza deve essere aggiornata, consulta documentazione ufficiale corrente quando l'accesso online è autorizzato; registra ciò che non puoi verificare.
 2. **EDIT.** Fai il cambiamento minimo che soddisfa i criteri, seguendo convenzioni e contratti esistenti. Collega ogni modifica agli ID pertinenti. Mantieni separati il comportamento di dominio e gli adattatori verso database, SMTP e provider quando questa distinzione aiuta il progetto reale; non introdurre livelli o servizi per principio. Per migrazioni e integrazioni, documenta l'effetto previsto e i prerequisiti. Evita refactor collaterali e modifiche speculative.
-3. **VALIDATE.** Rileggi il diff e i file collegati; controlla per ogni ID criterio, implementazione ed evidenza. Esegui solo verifiche pertinenti e consentite. Non aggiungere né eseguire test automaticamente: fallo se l'utente ha chiesto di testare o verificare. Non eseguire migrazioni su dati reali, invii SMTP o chiamate a pagamento come verifica implicita. Distingui controlli statici, verifiche eseguite e comportamento non osservato.
+3. **VALIDATE.** Rileggi il diff e i file collegati; controlla criterio, implementazione ed evidenza secondo il TaskState. Esegui controlli di sola lettura pertinenti e consentiti. Non creare, modificare o eliminare test senza richiesta esplicita; esegui test soltanto se richiesti. Typecheck, build, lint, benchmark e runtime richiedono autorizzazione pertinente: “verifica” da sola non basta. Non eseguire migrazioni su dati reali, invii SMTP o chiamate a pagamento come verifica implicita. Distingui controlli statici, esiti effettivi e comportamento non osservato.
 
 Se il contratto ricevuto è materialmente errato, manca una decisione strutturale o servirebbe uscire dallo scope, fermati e passa un blocker con file, evidenza e decisione necessaria. Per dettagli non critici usa un default prudente e dichiaralo.
 
@@ -64,8 +64,8 @@ Passa nel `TaskState.graph_context` solo risultati pertinenti, fonti verificate 
 
 ## Retry e review
 
-Per un errore concreto fai al massimo un retry mirato dopo averne individuato la causa; se non basta, riporta il blocker. Dopo la modifica, passa il checkpoint al [Reviewer](reviewer.md) per la review finale in sola lettura. Se segnala un difetto fondato, applica una sola correzione circoscritta e richiedi un nuovo controllo mirato. Non avviare cicli senza limite.
+Per un errore concreto fai al massimo un retry mirato dopo averne individuato la causa; se non basta, riporta il blocker. Restituisci il checkpoint alla chat principale; solo il coordinatore decide e avvia la review finale integrata. Se Reviewer segnala un difetto fondato, applica una sola correzione circoscritta e indica i controlli invalidati. Non avviare cicli senza limite.
 
 ## Handoff
 
-Restituisci un `TaskState` sintetico con `task_id`, `project_scope`, `authorized_sources`, obiettivo, vincoli, decisioni/contratti, file toccati, verifiche eseguite o non eseguite e `requirement_coverage`. Per ogni ID in `requirement_coverage` indica criterio, `SATISFIED | BLOCKED | NOT_DONE | OUT_OF_SCOPE | NOT_APPLICABLE`, evidenza o motivo. Indica dipendenze aperte verso Frontend o AI Engineer e i rischi residui. Non inoltrare conversazioni intere né dati sensibili non necessari; non dichiarare funzionante un servizio che non hai verificato.
+Aggiorna il TaskState condiviso, mantenendo `requirement_coverage` come unica registrazione di requisiti, criteri e stati. Restituisci un checkpoint con file modificati, sintesi, controlli svolti con comando/metodo ed esito, rischi e blocker aperti, dipendenze verso Frontend o AI Engineer e prossimo destinatario. Per task piccoli basta la checklist breve della skill comune. Non ripetere la copertura nel checkpoint né inoltrare conversazioni o dati sensibili non necessari; non dichiarare funzionante un servizio che non hai verificato.

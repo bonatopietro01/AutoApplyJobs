@@ -1,6 +1,6 @@
 # Design It Twice
 
-When the user wants to explore alternative interfaces for a chosen deepening candidate, use this parallel sub-agent pattern. Based on "Design It Twice" (Ousterhout): your first idea is unlikely to be the best.
+Use this method when the user asks to compare materially different interfaces or when a consequential design choice remains unresolved after direct analysis. Based on "Design It Twice" (Ousterhout): the first idea may not be the best. The main chat decides whether independent exploration is worth delegating; this skill never starts sub-agents itself.
 
 Uses the vocabulary in [SKILL.md](SKILL.md): **module**, **interface**, **seam**, **adapter**, **leverage**.
 
@@ -8,28 +8,28 @@ Uses the vocabulary in [SKILL.md](SKILL.md): **module**, **interface**, **seam**
 
 ### 1. Frame the problem space
 
-Before spawning sub-agents, write a user-facing explanation of the problem space for the chosen candidate:
+Before comparing alternatives, write a concise explanation of the problem space for the chosen candidate:
 
 - The constraints any new interface would need to satisfy
 - The dependencies it would rely on, and which category they fall into (see [DEEPENING.md](DEEPENING.md))
 - A rough illustrative code sketch to ground the constraints, not a proposal, just a way to make the constraints concrete
 
-Show this to the user, then immediately proceed to Step 2. The user reads and thinks while the sub-agents work in parallel.
+Share this with the user or coordinator. Continue with direct analysis when it can settle the choice.
 
-### 2. Spawn sub-agents
+### 2. Explore alternatives
 
-Spawn 3+ sub-agents in parallel. Each must produce a **radically different** interface for the deepened module.
+Do not require a minimum number of agents. If the main chat authorizes independent exploration, give each owner a distinct design constraint and a bounded brief; otherwise compare a small number of plausible alternatives directly.
 
-Prompt each sub-agent with a separate technical brief (file paths, coupling details, dependency category from [DEEPENING.md](DEEPENING.md), what sits behind the seam). The brief is independent of the user-facing problem-space explanation in Step 1. Give each agent a different design constraint:
+Use separate technical briefs only for authorized independent exploration (file paths, coupling details, dependency category from [DEEPENING.md](DEEPENING.md), what sits behind the seam). Select only the design constraints that expose meaningful trade-offs; they are options, not a required number of agents:
 
-- Agent 1: "Minimize the interface: aim for 1–3 entry points max. Maximise leverage per entry point."
-- Agent 2: "Maximise flexibility: support many use cases and extension."
-- Agent 3: "Optimise for the most common caller: make the default case trivial."
-- Agent 4 (if applicable): "Design around ports & adapters for cross-seam dependencies."
+- Minimize the interface: aim for 1–3 entry points; maximize leverage per entry point.
+- Maximize flexibility: support only the use cases and extensions justified by requirements.
+- Optimize for the common caller: make the default case simple.
+- When relevant, design around ports and adapters for cross-seam dependencies.
 
-Include both [SKILL.md](SKILL.md) vocabulary and GLOSSARY.md vocabulary in the brief so each sub-agent names things consistently with the architecture language and the project's domain language.
+Include [SKILL.md](SKILL.md) vocabulary in briefs so alternatives use consistent architecture language.
 
-Each sub-agent outputs:
+Each alternative should describe:
 
 1. Interface (types, methods, params, plus invariants, ordering, error modes)
 2. Usage example showing how callers use it

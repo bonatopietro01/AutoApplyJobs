@@ -456,7 +456,7 @@ class SyncCoordinator:
 
 class DashboardHTTPServer(ThreadingHTTPServer):
     daemon_threads = True
-    allow_reuse_address = True
+    allow_reuse_address = False
 
     def __init__(
         self,
@@ -2112,7 +2112,7 @@ def _validate_file_contents(file_format: str, contents: bytes) -> None:
 
 
 def serve_dashboard(
-    *, port: int = 8765, host: str = "127.0.0.1", open_browser: bool = False
+    *, port: int = 0, host: str = "127.0.0.1", open_browser: bool = False
 ) -> None:
     """Serve the local dashboard on loopback only."""
     if host not in {"127.0.0.1", "localhost"}:
